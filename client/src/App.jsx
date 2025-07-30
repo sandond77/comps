@@ -6,11 +6,16 @@ import SearchForm from './SearchForm';
 function App() {
 	// const [count, setCount] = useState(0);
 
+	const handleSubmit = (event) => {
+		event.preventDefault();
+		console.log('form submitted');
+	};
+
 	return (
 		<>
 			<Container>
 				<h1>Comps</h1>
-				<SearchForm />
+				<SearchForm handleSubmit={handleSubmit} />
 			</Container>
 		</>
 	);
