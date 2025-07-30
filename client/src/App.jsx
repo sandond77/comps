@@ -1,12 +1,17 @@
-import { useState } from 'react';
+// import { useState } from 'react';
 import './App.css';
+import { Container } from '@mui/material';
+import SearchForm from './SearchForm';
 
 function App() {
-	const [count, setCount] = useState(0);
+	// const [count, setCount] = useState(0);
 
 	return (
 		<>
-			<h1>Comps</h1>
+			<Container>
+				<h1>Comps</h1>
+				<SearchForm />
+			</Container>
 		</>
 	);
 }
