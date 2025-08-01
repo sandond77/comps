@@ -3,12 +3,16 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import React, { useState } from 'react';
 
-export default function SearchForm({ handleSubmit }) {
+export default function SearchForm({
+	handleSubmit,
+	setSearchStatus,
+	setQueryTerm
+}) {
 	const [formData, setFormData] = useState({
 		grade: '',
 		cardName: '',
-		cardGame: '',
 		cardNumber: '',
+		cardGame: '',
 		cardLanguage: '',
 		setName: ''
 	});
@@ -19,11 +23,13 @@ export default function SearchForm({ handleSubmit }) {
 		setFormData({
 			grade: '',
 			cardName: '',
-			cardGame: '',
 			cardNumber: '',
+			cardGame: '',
 			cardLanguage: '',
 			setName: ''
 		});
+		setQueryTerm('');
+		setSearchStatus(false);
 	};
 
 	const handleChange = (event) => {
@@ -33,13 +39,19 @@ export default function SearchForm({ handleSubmit }) {
 		}));
 	};
 
+	const submitForm = (event) => {
+		event.preventDefault();
+		setQueryTerm('');
+		handleSubmit(formData);
+	};
+
 	return (
-		<Box component="form" noValidate autoComplete="off">
+		<Box component="form" autoComplete="off" onSubmit={submitForm}>
 			<Grid container spacing={2}>
 				<Grid size={{ xs: 12, md: 4 }}>
 					<TextField
 						id="grade"
-						label="grade"
+						label="Grade"
 						name="grade"
 						fullWidth
 						value={formData.grade}
@@ -50,8 +62,8 @@ export default function SearchForm({ handleSubmit }) {
 					<TextField
 						required
 						id="cardName"
-						label="Card Name"
 						name="cardName"
+						label="Card Name"
 						fullWidth
 						value={formData.cardName}
 						onChange={handleChange}
@@ -60,8 +72,8 @@ export default function SearchForm({ handleSubmit }) {
 				<Grid size={{ xs: 12, md: 4 }}>
 					<TextField
 						id="cardNumber"
-						label="Card Number"
 						name="cardNumber"
+						label="Card Number"
 						fullWidth
 						value={formData.cardNumber}
 						onChange={handleChange}
@@ -102,9 +114,9 @@ export default function SearchForm({ handleSubmit }) {
 			</Grid>
 			<Button
 				variant="contained"
+				type="submit"
 				endIcon={<SearchIcon />}
 				sx={{ my: 2 }}
-				onClick={handleSubmit}
 			>
 				Search
 			</Button>
