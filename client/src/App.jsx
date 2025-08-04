@@ -46,7 +46,8 @@ function App() {
 			return setNoResult(true);
 		}
 
-		let resultArray = [];
+		let resultBinArray = [];
+		let resultAucArray = [];
 		filterResults.forEach((result) => {
 			let title = result.title.toLowerCase();
 			title = title.replace(' ', ''); //Removes potential whitespace so query will return PSA10 or PSA 10
@@ -54,13 +55,14 @@ function App() {
 			const cardName = formData.cardName.toLowerCase();
 
 			if (title.includes(grade) && title.includes(cardName)) {
-				resultArray.push(result);
+				resultBinArray.push(result);
+				console.log(result.buyingOptions[0]);
 			}
 		});
-		// console.log(resultArray);
+		console.log(resultBinArray);
 
 		let priceArray = [];
-		resultArray.forEach((result) => {
+		resultBinArray.forEach((result) => {
 			const { value, currency } = result.price;
 			if (currency === 'USD') {
 				priceArray.push(parseFloat(value));
@@ -122,8 +124,8 @@ function App() {
 					handleSubmit={handleSubmit}
 					setSearchStatus={setSearchStatus}
 					setQueryTerm={setQueryTerm}
+					setStatsData={setStatsData}
 				/>
-
 				{searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Typography
@@ -139,7 +141,6 @@ function App() {
 						</Typography>
 					</Box>
 				)}
-
 				{noResult && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Typography
@@ -151,6 +152,25 @@ function App() {
 						>
 							No Results Found
 						</Typography>
+					</Box>
+				)}
+
+				{searchStatus && (
+					<Box sx={{ border: '1px solid', margin: '2' }}>
+						<Typography
+							variant="h2"
+							color="warning"
+							gutterBottom
+							sx={{ marginTop: 4 }}
+							theme={theme}
+						>
+							Active Listings Data:
+						</Typography>
+						{Object.entries(statsData).map(([key, value]) => (
+							<Typography key={key} variant="h5">
+								{key}: ${value}
+							</Typography>
+						))}
 					</Box>
 				)}
 			</Container>

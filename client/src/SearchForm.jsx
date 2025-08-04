@@ -6,7 +6,8 @@ import React, { useState } from 'react';
 export default function SearchForm({
 	handleSubmit,
 	setSearchStatus,
-	setQueryTerm
+	setQueryTerm,
+	setStatsData
 }) {
 	const [formData, setFormData] = useState({
 		grade: '',
@@ -34,6 +35,11 @@ export default function SearchForm({
 		});
 		setQueryTerm('');
 		setSearchStatus(false);
+		setStatsData({
+			average: '',
+			low: '',
+			high: ''
+		});
 	};
 
 	const handleChange = (event) => {
