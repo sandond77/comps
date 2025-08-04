@@ -12,9 +12,11 @@ export default function SearchForm({
 		grade: '',
 		cardName: '',
 		cardNumber: '',
+		cardRarity: '',
 		cardGame: '',
 		cardLanguage: '',
-		setName: ''
+		setName: '',
+		additionalDetail: ''
 	});
 
 	const handleReset = (event) => {
@@ -24,9 +26,11 @@ export default function SearchForm({
 			grade: '',
 			cardName: '',
 			cardNumber: '',
+			cardRarity: '',
 			cardGame: '',
 			cardLanguage: '',
-			setName: ''
+			setName: '',
+			additionalDetail: ''
 		});
 		setQueryTerm('');
 		setSearchStatus(false);
@@ -48,7 +52,7 @@ export default function SearchForm({
 	return (
 		<Box component="form" autoComplete="off" onSubmit={submitForm}>
 			<Grid container spacing={2}>
-				<Grid size={{ xs: 12, md: 4 }}>
+				<Grid size={{ xs: 12, md: 2 }}>
 					<TextField
 						id="grade"
 						label="Grade"
@@ -69,7 +73,7 @@ export default function SearchForm({
 						onChange={handleChange}
 					/>
 				</Grid>
-				<Grid size={{ xs: 12, md: 4 }}>
+				<Grid size={{ xs: 12, md: 2 }}>
 					<TextField
 						id="cardNumber"
 						name="cardNumber"
@@ -79,7 +83,17 @@ export default function SearchForm({
 						onChange={handleChange}
 					/>
 				</Grid>
-				<Grid size={{ xs: 12, md: 6 }}>
+				<Grid size={{ xs: 12, md: 4 }}>
+					<TextField
+						id="cardRarity"
+						name="cardRarity"
+						label="Card Rarity"
+						fullWidth
+						value={formData.cardRarity}
+						onChange={handleChange}
+					/>
+				</Grid>
+				<Grid size={{ xs: 12, md: 4 }}>
 					<TextField
 						required
 						id="cardGame"
@@ -90,14 +104,23 @@ export default function SearchForm({
 						onChange={handleChange}
 					/>
 				</Grid>
-				<Grid size={{ xs: 12, md: 6 }}>
+				<Grid size={{ xs: 12, md: 4 }}>
 					<TextField
-						required
 						id="cardLanguage"
 						name="cardLanguage"
 						label="Language"
 						fullWidth
 						value={formData.cardLanguage}
+						onChange={handleChange}
+					/>
+				</Grid>
+				<Grid size={{ xs: 12, md: 4 }}>
+					<TextField
+						id="additionalDetail"
+						name="additionalDetail"
+						label="Additional Detail"
+						fullWidth
+						value={formData.additionalDetail}
 						onChange={handleChange}
 					/>
 				</Grid>
