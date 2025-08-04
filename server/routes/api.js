@@ -48,7 +48,6 @@ router.get('/search', async (req, res) => {
 
 		// console.log('Authorization header:', `Bearer ${token}`);
 		// console.log('Browse API response:', ebayRes.data);
-		console.log('search route hit');
 		res.json(ebayRes.data);
 	} catch (err) {
 		console.error(err.response?.data || err.message);
