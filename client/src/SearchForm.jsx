@@ -35,7 +35,12 @@ export default function SearchForm({
 		});
 		setQueryTerm('');
 		setSearchStatus(false);
-		setStatsData({
+		setAucStatsData({
+			average: '',
+			low: '',
+			high: ''
+		});
+		setBinStatsData({
 			average: '',
 			low: '',
 			high: ''

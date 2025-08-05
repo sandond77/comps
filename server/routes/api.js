@@ -12,7 +12,7 @@ router.get('/search', async (req, res) => {
 		const aucResults = await browseAPI(query, 'AUCTION');
 
 		const combinedResults = {
-			fixedPrice: binResults.data.itemSummaries,
+			bin: binResults.data.itemSummaries,
 			auction: aucResults.data.itemSummaries
 		};
 		res.json(combinedResults);

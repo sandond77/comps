@@ -6,16 +6,21 @@ import {
 	Box,
 	createTheme,
 	responsiveFontSizes,
-	formControlLabelClasses
+	Grid
 } from '@mui/material';
 import SearchForm from './SearchForm';
-import axios from 'axios';
+import { parseApiData } from './utils/utils';
 
 function App() {
 	const [searchStatus, setSearchStatus] = useState(false);
 	const [queryTerm, setQueryTerm] = useState('');
 	const [noResult, setNoResult] = useState(false);
-	const [statsData, setStatsData] = useState({
+	const [aucStatsData, setAucStatsData] = useState({
+		average: '',
+		low: '',
+		high: ''
+	});
+	const [binStatsData, setBinStatsData] = useState({
 		average: '',
 		low: '',
 		high: ''
@@ -29,90 +34,27 @@ function App() {
 		const parsedFormData = formValues.filter(Boolean).join(' '); //removes any blank spaces from array and joins elements with a space
 		setQueryTerm(parsedFormData);
 		setSearchStatus(true);
-		setNoResult(false);
-		setStatsData({
-			average: '',
-			low: '',
-			high: ''
+		// setNoResult(false);
+		// setStatsData({
+		// 	average: '',
+		// 	low: '',
+		// 	high: ''
+		// });
+
+		let statistics = await parseApiData(parsedFormData, formData);
+		console.log(`stats`);
+		console.log(statistics);
+		setBinStatsData({
+			average: statistics.bin.Average,
+			low: statistics.bin.Lowest,
+			high: statistics.bin.Highest
 		});
-
-		const queryParams = new URLSearchParams({ q: parsedFormData }).toString(); //using a const declared value instead of state value due to delays in state update
-		console.log(`search param: ${queryParams}`);
-
-		const unfilteredResults = await queryEbay(queryParams);
-		let filterResults = unfilteredResults.data.itemSummaries;
-
-		if (isEmpty(filterResults)) {
-			return setNoResult(true);
-		}
-
-		let resultBinArray = [];
-		let resultAucArray = [];
-		filterResults.forEach((result) => {
-			let title = result.title.toLowerCase();
-			title = title.replace(' ', ''); //Removes potential whitespace so query will return PSA10 or PSA 10
-			const grade = formData.grade.toLowerCase();
-			const cardName = formData.cardName.toLowerCase();
-
-			if (title.includes(grade) && title.includes(cardName)) {
-				resultBinArray.push(result);
-				console.log(result.buyingOptions[0]);
-			}
-		});
-		console.log(resultBinArray);
-
-		let priceArray = [];
-		resultBinArray.forEach((result) => {
-			const { value, currency } = result.price;
-			if (currency === 'USD') {
-				priceArray.push(parseFloat(value));
-			}
-		});
-		console.log(priceArray);
-		const averageAsk = calculateAverage(priceArray).toFixed(2);
-		const lowestAsk = Math.min(...priceArray).toFixed(2);
-		const highestAsk = Math.max(...priceArray).toFixed(2);
-
-		setStatsData({
-			average: averageAsk,
-			low: lowestAsk,
-			high: highestAsk
+		setAucStatsData({
+			average: statistics.auc.Average,
+			low: statistics.auc.Lowest,
+			high: statistics.auc.Highest
 		});
 	};
-
-	async function queryEbay(params) {
-		try {
-			const ebaySearch = await axios.get(
-				`http://localhost:3001/api/search?${params}`
-			);
-			return ebaySearch;
-		} catch (error) {
-			console.error(error);
-		}
-	}
-
-	//helper function to detect empty object returns
-	function isEmpty(obj) {
-		for (const prop in obj) {
-			if (Object.hasOwn(obj, prop)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	//helper function to calculate average array value
-	function calculateAverage(arr) {
-		if (!Array.isArray(arr) || arr.length === 0) {
-			return 0; // Handle empty or non-array inputs
-		}
-
-		const sum = arr.reduce(
-			(accumulator, currentValue) => accumulator + currentValue,
-			0
-		);
-		return sum / arr.length;
-	}
 
 	return (
 		<>
@@ -124,7 +66,8 @@ function App() {
 					handleSubmit={handleSubmit}
 					setSearchStatus={setSearchStatus}
 					setQueryTerm={setQueryTerm}
-					setStatsData={setStatsData}
+					setAucStatsData={setAucStatsData}
+					setBinStatsData={setBinStatsData}
 				/>
 				{searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
@@ -157,20 +100,47 @@ function App() {
 
 				{searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
-						<Typography
-							variant="h2"
-							color="warning"
-							gutterBottom
-							sx={{ marginTop: 4 }}
-							theme={theme}
-						>
-							Active Listings Data:
-						</Typography>
-						{Object.entries(statsData).map(([key, value]) => (
-							<Typography key={key} variant="h5">
-								{key}: ${value}
-							</Typography>
-						))}
+						<Grid container spacing={2}>
+							<Grid
+								size={{ xs: 12, md: 6 }}
+								sx={{ border: '1px solid', margin: '2' }}
+								sx={{ border: '1px solid', margin: '2' }}
+							>
+								<Typography
+									variant="h2"
+									color="warning"
+									gutterBottom
+									sx={{ marginTop: 4 }}
+									theme={theme}
+								>
+									Active Auction Data:
+								</Typography>
+								{Object.entries(aucStatsData).map(([key, value]) => (
+									<Typography key={key} variant="h5">
+										{key}: ${value}
+									</Typography>
+								))}
+							</Grid>
+							<Grid
+								size={{ xs: 12, md: 6 }}
+								sx={{ border: '1px solid', margin: '2' }}
+							>
+								<Typography
+									variant="h2"
+									color="warning"
+									gutterBottom
+									sx={{ marginTop: 4 }}
+									theme={theme}
+								>
+									Active BIN Data:
+								</Typography>
+								{Object.entries(binStatsData).map(([key, value]) => (
+									<Typography key={key} variant="h5">
+										{key}: ${value}
+									</Typography>
+								))}
+							</Grid>
+						</Grid>
 					</Box>
 				)}
 			</Container>
