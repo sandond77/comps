@@ -56,8 +56,9 @@ function parseResults(arr1, arr2, formData) {
 		title = title.replace(/\s/g, ''); //Removes potential whitespace so query will return PSA10 or PSA 10
 		console.log(title);
 		const grade = formData.grade.toLowerCase();
-		const cardName = formData.cardName.toLowerCase();
+		const cardName = formData.cardName.toLowerCase().replace(/\s/g, '');
 		const cardNumber = formData.cardNumber.toLowerCase();
+		console.log(grade, cardName, cardNumber);
 		if (
 			title.includes(grade) &&
 			title.includes(cardName) &&
@@ -69,6 +70,8 @@ function parseResults(arr1, arr2, formData) {
 	console.log(arr1);
 
 	let priceArray = [];
+
+	//add if check to look for empty array
 	arr2.forEach((result) => {
 		const { value, currency } = result.price || result.currentBidPrice;
 		if (currency === 'USD') {
