@@ -34,31 +34,66 @@ export function calculateAverage(arr) {
 	return sum / arr.length;
 }
 
-export async function parseApiData(parsedFormData, formData) {
+export async function parseApiData(parsedFormData, formData, setNoResult) {
 	const queryParams = new URLSearchParams({ q: parsedFormData }).toString(); //using a const declared value instead of state value due to delays in state update
 
 	const unfilteredResults = await queryEbay(queryParams);
-	let filteredBinResults = unfilteredResults.data.bin;
-	let filteredAucResults = unfilteredResults.data.auction;
+	const filteredBinResults = unfilteredResults.data.bin;
+	const filteredAucResults = unfilteredResults.data.auction;
+
+	console.log(filteredAucResults);
+	console.log(filteredBinResults);
+
+	//Want to check initial query for results; queryEbay should return an non-empty object if theres results
+	const noBinResults =
+		filteredBinResults === null || filteredBinResults === undefined;
+	const noAucResults =
+		filteredAucResults === null || filteredAucResults === undefined;
+
+	console.log(noAucResults, noBinResults);
+
+	//update state immediately to render conditional "no results"
+	setNoResult({
+		bin: noBinResults,
+		auc: noAucResults
+	});
+
+	if (noBinResults && noAucResults) return; //ends function if empty
 
 	let resultBinArray = [];
 	let resultAucArray = [];
 
-	let binStats = parseResults(filteredBinResults, resultBinArray, formData);
-	let aucStats = parseResults(filteredAucResults, resultAucArray, formData);
+	let binStats = noBinResults
+		? null
+		: parseResults(
+				filteredBinResults,
+				resultBinArray,
+				formData,
+				setNoResult,
+				'bin'
+		  );
+	let aucStats = noAucResults
+		? null
+		: parseResults(
+				filteredAucResults,
+				resultAucArray,
+				formData,
+				setNoResult,
+				'auc'
+		  );
 
 	return { bin: binStats, auc: aucStats };
 }
 
-function parseResults(arr1, arr2, formData) {
+function parseResults(arr1, arr2, formData, setNoResult, id) {
 	arr1.forEach((result) => {
 		let title = result.title.toLowerCase();
 		title = title.replace(/\s/g, ''); //Removes potential whitespace so query will return PSA10 or PSA 10
-		console.log(title);
+		// console.log(title);
 		const grade = formData.grade.toLowerCase();
 		const cardName = formData.cardName.toLowerCase().replace(/\s/g, '');
 		const cardNumber = formData.cardNumber.toLowerCase();
-		console.log(grade, cardName, cardNumber);
+		// console.log(grade, cardName, cardNumber);
 		if (
 			title.includes(grade) &&
 			title.includes(cardName) &&
@@ -67,6 +102,7 @@ function parseResults(arr1, arr2, formData) {
 			arr2.push(result);
 		}
 	});
+
 	console.log(arr1);
 
 	let priceArray = [];
@@ -79,11 +115,22 @@ function parseResults(arr1, arr2, formData) {
 		}
 	});
 
-	console.log(priceArray);
+	if (priceArray.length === 0 ? updateResult(id): ()
+		setNoResult((prev) => ({
+			...prev,
+			[id]: true
+		}));
+		return;
+	} else {
 
-	return {
-		Average: calculateAverage(priceArray).toFixed(2),
-		Lowest: Math.min(...priceArray).toFixed(2),
-		Highest: Math.max(...priceArray).toFixed(2)
-	};
+	}
+}
+
+
+function updateResult(id){
+	setNoResult((prev) => ({
+		...prev,
+		[id]: true
+	}));
+	return;
 }

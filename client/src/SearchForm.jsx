@@ -7,7 +7,8 @@ export default function SearchForm({
 	handleSubmit,
 	setSearchStatus,
 	setQueryTerm,
-	setStatsData
+	setAucStatsData,
+	setBinStatsData
 }) {
 	const [formData, setFormData] = useState({
 		grade: '',

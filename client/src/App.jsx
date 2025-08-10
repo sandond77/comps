@@ -14,7 +14,10 @@ import { parseApiData } from './utils/utils';
 function App() {
 	const [searchStatus, setSearchStatus] = useState(false);
 	const [queryTerm, setQueryTerm] = useState('');
-	const [noResult, setNoResult] = useState(false);
+	const [noResult, setNoResult] = useState({
+		auc: true,
+		bin: true
+	});
 	const [aucStatsData, setAucStatsData] = useState({
 		average: '',
 		low: '',
@@ -34,26 +37,27 @@ function App() {
 		const parsedFormData = formValues.filter(Boolean).join(' '); //removes any blank spaces from array and joins elements with a space
 		setQueryTerm(parsedFormData);
 		setSearchStatus(true);
-		// setNoResult(false);
-		// setStatsData({
-		// 	average: '',
-		// 	low: '',
-		// 	high: ''
-		// });
 
-		let statistics = await parseApiData(parsedFormData, formData);
+		let statistics = await parseApiData(parsedFormData, formData, setNoResult);
 		console.log(`stats`);
 		console.log(statistics);
-		setBinStatsData({
-			average: statistics.bin.Average,
-			low: statistics.bin.Lowest,
-			high: statistics.bin.Highest
-		});
-		setAucStatsData({
-			average: statistics.auc.Average,
-			low: statistics.auc.Lowest,
-			high: statistics.auc.Highest
-		});
+
+		console.log(noResult.bin, noResult.auc);
+		if (!noResult.bin) {
+			setBinStatsData({
+				average: statistics.bin.Average,
+				low: statistics.bin.Lowest,
+				high: statistics.bin.Highest
+			});
+		}
+
+		if (!noResult.auc) {
+			setAucStatsData({
+				average: statistics.auc.Average,
+				low: statistics.auc.Lowest,
+				high: statistics.auc.Highest
+			});
+		}
 	};
 
 	return (
@@ -84,7 +88,7 @@ function App() {
 						</Typography>
 					</Box>
 				)}
-				{noResult && (
+				{noResult.auc && noResult.bin && searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Typography
 							variant="h2"
@@ -93,33 +97,34 @@ function App() {
 							sx={{ marginTop: 4 }}
 							theme={theme}
 						>
-							No Results Found
+							No Results Found - Try Different Query
 						</Typography>
 					</Box>
 				)}
 
-				{searchStatus && (
+				{!noResult.auc && !noResult.bin && searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Grid container spacing={2}>
 							<Grid
 								size={{ xs: 12, md: 6 }}
 								sx={{ border: '1px solid', margin: '2' }}
-								sx={{ border: '1px solid', margin: '2' }}
 							>
 								<Typography
 									variant="h2"
-									color="warning"
+									color="Success"
 									gutterBottom
 									sx={{ marginTop: 4 }}
 									theme={theme}
 								>
 									Active Auction Data:
 								</Typography>
-								{Object.entries(aucStatsData).map(([key, value]) => (
-									<Typography key={key} variant="h5">
-										{key}: ${value}
-									</Typography>
-								))}
+								{noResult.auc
+									? 'No Active Auction Data Found'
+									: Object.entries(aucStatsData).map(([key, value]) => (
+											<Typography key={key} variant="h5">
+												{key}: ${value}
+											</Typography>
+									  ))}
 							</Grid>
 							<Grid
 								size={{ xs: 12, md: 6 }}
@@ -127,18 +132,20 @@ function App() {
 							>
 								<Typography
 									variant="h2"
-									color="warning"
+									color="Success"
 									gutterBottom
 									sx={{ marginTop: 4 }}
 									theme={theme}
 								>
 									Active BIN Data:
 								</Typography>
-								{Object.entries(binStatsData).map(([key, value]) => (
-									<Typography key={key} variant="h5">
-										{key}: ${value}
-									</Typography>
-								))}
+								{noResult.bin
+									? 'No Active Bin Data Found'
+									: Object.entries(binStatsData).map(([key, value]) => (
+											<Typography key={key} variant="h5">
+												{key}: ${value}
+											</Typography>
+									  ))}
 							</Grid>
 						</Grid>
 					</Box>
