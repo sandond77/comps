@@ -43,7 +43,7 @@ function App() {
 		console.log(statistics);
 
 		console.log(noResult.bin, noResult.auc);
-		if (!noResult.bin) {
+		if (noResult.bin === false) {
 			setBinStatsData({
 				average: statistics.bin.Average,
 				low: statistics.bin.Lowest,
@@ -51,7 +51,7 @@ function App() {
 			});
 		}
 
-		if (!noResult.auc) {
+		if (noResult.auc === false) {
 			setAucStatsData({
 				average: statistics.auc.Average,
 				low: statistics.auc.Lowest,
@@ -102,7 +102,7 @@ function App() {
 					</Box>
 				)}
 
-				{!noResult.auc && !noResult.bin && searchStatus && (
+				{(!noResult.auc || !noResult.bin) && searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Grid container spacing={2}>
 							<Grid

@@ -105,6 +105,11 @@ function parseResults(arr1, arr2, formData, setNoResult, id) {
 
 	console.log(arr1);
 
+	if (arr2.length === 0) {
+		updateResult(id);
+		return;
+	}
+
 	let priceArray = [];
 
 	//add if check to look for empty array
@@ -115,19 +120,20 @@ function parseResults(arr1, arr2, formData, setNoResult, id) {
 		}
 	});
 
-	if (priceArray.length === 0 ? updateResult(id): ()
-		setNoResult((prev) => ({
-			...prev,
-			[id]: true
-		}));
+	if (priceArray.length === 0) {
+		updateResult(id);
 		return;
 	} else {
-
+		console.log(priceArray);
+		return {
+			Average: calculateAverage(priceArray).toFixed(2),
+			Lowest: Math.min(...priceArray).toFixed(2),
+			Highest: Math.max(...priceArray).toFixed(2)
+		};
 	}
 }
 
-
-function updateResult(id){
+function updateResult(id) {
 	setNoResult((prev) => ({
 		...prev,
 		[id]: true
