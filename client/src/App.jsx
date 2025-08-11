@@ -44,24 +44,24 @@ function App() {
 		setStatistics(await parseApiData(parsedFormData, formData, setNoResult));
 	};
 
-	//need useeffect to await state changes and refresh dom
+	//need useeffect to listen to statistic/result state changes and refresh dom
 	useEffect(() => {
 		console.log(noResult.bin, noResult.auc);
 		if (noResult.bin === false) {
 			setBinStatsData({
-				Average: statistics.bin.Average,
-				Low: statistics.bin.Lowest,
-				High: statistics.bin.Highest,
-				'Data Points': statistics.bin['Data Points']
+				Average: `$${statistics.bin.Average}`,
+				Low: `$${statistics.bin.Lowest}`,
+				High: `$${statistics.bin.Highest}`,
+				'# of Data Points': statistics.bin['Data Points']
 			});
 		}
 
 		if (noResult.auc === false) {
 			setAucStatsData({
-				Average: statistics.auc.Average,
-				Low: statistics.auc.Lowest,
-				High: statistics.auc.Highest,
-				'Data Points': statistics.auc['Data Points']
+				Average: `$${statistics.auc.Average}`,
+				Low: `$${statistics.auc.Lowest}`,
+				High: `$${statistics.auc.Highest}`,
+				'# of Data Points': statistics.auc['Data Points']
 			});
 		}
 	}, [statistics, noResult]);
@@ -82,14 +82,14 @@ function App() {
 				{searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Typography
-							variant="h2"
+							variant="h5"
 							gutterBottom
 							sx={{ marginTop: 4 }}
 							theme={theme}
 						>
 							Optimal Query String will be:
 						</Typography>
-						<Typography variant="h3" color="primary" gutterBottom theme={theme}>
+						<Typography variant="h4" color="primary" gutterBottom theme={theme}>
 							{queryTerm}
 						</Typography>
 					</Box>
@@ -113,7 +113,7 @@ function App() {
 						<Grid container spacing={2}>
 							<Grid
 								size={{ xs: 12, md: 6 }}
-								sx={{ border: '1px solid', margin: '2' }}
+								sx={{ borderRight: '1px solid', margin: '2' }}
 							>
 								<Typography
 									variant="h2"
@@ -128,14 +128,11 @@ function App() {
 									? 'No Active Auction Data Found'
 									: Object.entries(aucStatsData).map(([key, value]) => (
 											<Typography key={key} variant="h5">
-												{key}: ${value}
+												{key}: {value}
 											</Typography>
 									  ))}
 							</Grid>
-							<Grid
-								size={{ xs: 12, md: 6 }}
-								sx={{ border: '1px solid', margin: '2' }}
-							>
+							<Grid size={{ xs: 12, md: 6 }}>
 								<Typography
 									variant="h2"
 									color="Success"
@@ -149,7 +146,7 @@ function App() {
 									? 'No Active Bin Data Found'
 									: Object.entries(binStatsData).map(([key, value]) => (
 											<Typography key={key} variant="h5">
-												{key}: ${value}
+												{key}: {value}
 											</Typography>
 									  ))}
 							</Grid>

@@ -87,11 +87,22 @@ function parseResults(arr1, arr2, formData, setNoResult, id) {
 	arr1.forEach((result) => {
 		let title = result.title.toLowerCase();
 		title = title.replace(/\s/g, ''); //Removes potential whitespace so query will return PSA10 or PSA 10
-		// console.log(title);
+		console.log(title);
 		const grade = formData.grade.toLowerCase();
 		const cardName = formData.cardName.toLowerCase().replace(/\s/g, '');
 		const cardNumber = formData.cardNumber.toLowerCase();
+		const setName = formData.setName.toLowerCase().replace(/\s/g, '');
+		const additionalDetail = formData.setName.toLowerCase().replace(/\s/g, '');
+		// const setNameMatch = setName ? title.includes(setName) : true;
+		// const additionalDetailMatch = additionalDetail ? title.includes(additionalDetail) : true;
+		//&& (setNameMatch || additionalDetailMatch)
+
 		// console.log(grade, cardName, cardNumber);
+		// console.log(
+		// 	title.includes(grade),
+		// 	title.includes(cardName),
+		// 	title.includes(cardNumber)
+		// );
 		if (
 			title.includes(grade) &&
 			title.includes(cardName) &&
@@ -101,6 +112,16 @@ function parseResults(arr1, arr2, formData, setNoResult, id) {
 		}
 	});
 
+	//form data aarray
+	// //		grade: '',
+	// 	cardName: '',
+	// 	cardNumber: '',
+	// 	cardRarity: '',
+	// 	cardGame: '',
+	// 	cardLanguage: '',
+	// 	setName: '',
+	// 	additionalDetail: ''
+
 	console.log(id, arr1);
 
 	if (arr2.length === 0) {
@@ -109,6 +130,7 @@ function parseResults(arr1, arr2, formData, setNoResult, id) {
 	}
 
 	let priceArray = [];
+	let listingsArray = [];
 
 	//add if check to look for empty array
 	arr2.forEach((result) => {
@@ -116,14 +138,21 @@ function parseResults(arr1, arr2, formData, setNoResult, id) {
 		if (currency === 'USD') {
 			priceArray.push(parseFloat(value));
 		}
+		const listingDetail = {
+			title: result.title,
+			thumbnail: result.image.imageUrl,
+			url: result.itemWebUrl,
+			seller: result.seller.username
+		};
+		listingsArray.push(listingDetail);
 	});
 
-	console.log(`price array ${priceArray}`);
+	console.log(listingsArray);
 	if (priceArray.length === 0) {
 		updateResult(setNoResult, id);
 		return;
 	} else {
-		console.log(priceArray);
+		console.log(`price array ${priceArray}`);
 		return {
 			Average: calculateAverage(priceArray).toFixed(2),
 			Lowest: Math.min(...priceArray).toFixed(2),
