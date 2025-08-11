@@ -34,7 +34,13 @@ export function calculateAverage(arr) {
 	return sum / arr.length;
 }
 
-export async function parseApiData(parsedFormData, formData, setNoResult) {
+export async function parseApiData(
+	parsedFormData,
+	formData,
+	setNoResult,
+	setAucListings,
+	setBinListings
+) {
 	const queryParams = new URLSearchParams({ q: parsedFormData }).toString(); //using a const declared value instead of state value due to delays in state update
 
 	const unfilteredResults = await queryEbay(queryParams);
@@ -67,7 +73,8 @@ export async function parseApiData(parsedFormData, formData, setNoResult) {
 				resultBinArray,
 				formData,
 				setNoResult,
-				'bin'
+				'bin',
+				setBinListings
 		  );
 
 	let aucStats = noAucResults
@@ -77,13 +84,14 @@ export async function parseApiData(parsedFormData, formData, setNoResult) {
 				resultAucArray,
 				formData,
 				setNoResult,
-				'auc'
+				'auc',
+				setAucListings
 		  );
 
 	return { bin: binStats, auc: aucStats };
 }
 
-function parseResults(arr1, arr2, formData, setNoResult, id) {
+function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 	arr1.forEach((result) => {
 		let title = result.title.toLowerCase();
 		title = title.replace(/\s/g, ''); //Removes potential whitespace so query will return PSA10 or PSA 10
@@ -146,13 +154,13 @@ function parseResults(arr1, arr2, formData, setNoResult, id) {
 		};
 		listingsArray.push(listingDetail);
 	});
-
-	console.log(listingsArray);
+	// console.log(listingsArray);
 	if (priceArray.length === 0) {
 		updateResult(setNoResult, id);
 		return;
 	} else {
 		console.log(`price array ${priceArray}`);
+		stateListing(listingsArray);
 		return {
 			Average: calculateAverage(priceArray).toFixed(2),
 			Lowest: Math.min(...priceArray).toFixed(2),

@@ -32,6 +32,8 @@ function App() {
 		High: '',
 		'Data Points': 0
 	});
+	const [aucListings, setAucListings] = useState('');
+	const [binListings, setBinListings] = useState('');
 	let theme = createTheme();
 	theme = responsiveFontSizes(theme);
 
@@ -41,7 +43,15 @@ function App() {
 		const parsedFormData = formValues.filter(Boolean).join(' '); //removes any blank spaces from array and joins elements with a space
 		setQueryTerm(parsedFormData);
 		setSearchStatus(true);
-		setStatistics(await parseApiData(parsedFormData, formData, setNoResult));
+		setStatistics(
+			await parseApiData(
+				parsedFormData,
+				formData,
+				setNoResult,
+				setAucListings,
+				setBinListings
+			)
+		);
 	};
 
 	//need useeffect to listen to statistic/result state changes and refresh dom
