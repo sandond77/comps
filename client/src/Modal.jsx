@@ -16,7 +16,8 @@ const style = {
 	border: '2px solid #000',
 	boxShadow: 24,
 	p: 4,
-	overflowY: 'auto'
+	overflowY: 'auto',
+	overflowX: 'auto'
 };
 
 export default function BasicModal({ listings }) {
