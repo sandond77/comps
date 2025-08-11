@@ -11,6 +11,7 @@ import {
 import SearchForm from './SearchForm';
 import { parseApiData } from './utils/utils';
 import { useEffect } from 'react';
+import Modal from './Modal';
 
 function App() {
 	const [searchStatus, setSearchStatus] = useState(false);
@@ -141,6 +142,7 @@ function App() {
 												{key}: {value}
 											</Typography>
 									  ))}
+								<Modal listings={aucListings} />
 							</Grid>
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Typography
@@ -159,6 +161,7 @@ function App() {
 												{key}: {value}
 											</Typography>
 									  ))}
+								<Modal listings={binListings} />
 							</Grid>
 						</Grid>
 					</Box>
