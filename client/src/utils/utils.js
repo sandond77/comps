@@ -145,14 +145,16 @@ function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 		const { value, currency } = result.price || result.currentBidPrice;
 		if (currency === 'USD') {
 			priceArray.push(parseFloat(value));
+
+			const listingDetail = {
+				id: result.itemId,
+				title: result.title,
+				thumbnail: result.image.imageUrl,
+				url: result.itemWebUrl,
+				seller: result.seller.username,
+				price: parseFloat(value)
+			};
 		}
-		const listingDetail = {
-			id: result.itemId,
-			title: result.title,
-			thumbnail: result.image.imageUrl,
-			url: result.itemWebUrl,
-			seller: result.seller.username
-		};
 		listingsArray.push(listingDetail);
 	});
 	// console.log(listingsArray);

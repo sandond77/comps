@@ -36,16 +36,10 @@ export default function SearchForm({
 		});
 		setQueryTerm('');
 		setSearchStatus(false);
-		setAucStatsData({
-			average: '',
-			low: '',
-			high: ''
-		});
-		setBinStatsData({
-			average: '',
-			low: '',
-			high: ''
-		});
+		setAucStatsData('');
+		setBinStatsData('');
+		setAucListings('');
+		setBinListigs('');
 	};
 
 	const handleChange = (event) => {
