@@ -3,17 +3,20 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
+import ListingsTable from './ListingsTable.jsx';
 
 const style = {
 	position: 'absolute',
 	top: '50%',
 	left: '50%',
 	transform: 'translate(-50%, -50%)',
-	width: 400,
+	width: 'min(90vw, 800px)',
+	maxHeight: '80vh',
 	bgcolor: 'background.paper',
 	border: '2px solid #000',
 	boxShadow: 24,
-	p: 4
+	p: 4,
+	overflowY: 'auto'
 };
 
 export default function BasicModal({ listings }) {
@@ -23,7 +26,7 @@ export default function BasicModal({ listings }) {
 
 	return (
 		<div>
-			<Button onClick={handleOpen}>Open modal</Button>
+			<Button onClick={handleOpen}>View Listings</Button>
 			<Modal
 				open={open}
 				onClose={handleClose}
@@ -34,16 +37,17 @@ export default function BasicModal({ listings }) {
 					<Typography id="modal-modal-title" variant="h6" component="h2">
 						Current Listings
 					</Typography>
-					<ol>
+					{/* <ol>
 						{listings.map((listing) => (
 							<li key={listing.id}>
 								<a href={listing.url} target="_blank">
 									{listing.title}
 								</a>
-								- {listing.price} by {listing.seller}
+								- ${listing.price} by {listing.seller}
 							</li>
 						))}
-					</ol>
+					</ol> */}
+					<ListingsTable listings={listings} />
 				</Box>
 			</Modal>
 		</div>

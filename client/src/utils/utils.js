@@ -120,16 +120,6 @@ function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 		}
 	});
 
-	//form data aarray
-	// //		grade: '',
-	// 	cardName: '',
-	// 	cardNumber: '',
-	// 	cardRarity: '',
-	// 	cardGame: '',
-	// 	cardLanguage: '',
-	// 	setName: '',
-	// 	additionalDetail: ''
-
 	console.log(id, arr1);
 
 	if (arr2.length === 0) {
@@ -154,8 +144,9 @@ function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 				seller: result.seller.username,
 				price: parseFloat(value)
 			};
+
+			listingsArray.push(listingDetail);
 		}
-		listingsArray.push(listingDetail);
 	});
 	// console.log(listingsArray);
 	if (priceArray.length === 0) {

@@ -79,6 +79,8 @@ function App() {
 					setQueryTerm={setQueryTerm}
 					setAucStatsData={setAucStatsData}
 					setBinStatsData={setBinStatsData}
+					setAucListings={setAucListings}
+					setBinListings={setBinListings}
 				/>
 				{searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
@@ -132,7 +134,7 @@ function App() {
 												{key}: {value}
 											</Typography>
 									  ))}
-								{/* <Modal listings={aucListings} /> */}
+								<Modal listings={aucListings} />
 							</Grid>
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Typography
