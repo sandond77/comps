@@ -21,18 +21,8 @@ function App() {
 		auc: true,
 		bin: true
 	});
-	const [aucStatsData, setAucStatsData] = useState({
-		Average: '',
-		Low: '',
-		High: '',
-		'Data Points': 0
-	});
-	const [binStatsData, setBinStatsData] = useState({
-		Average: '',
-		Low: '',
-		High: '',
-		'Data Points': 0
-	});
+	const [aucStatsData, setAucStatsData] = useState('');
+	const [binStatsData, setBinStatsData] = useState('');
 	const [aucListings, setAucListings] = useState('');
 	const [binListings, setBinListings] = useState('');
 	let theme = createTheme();
@@ -142,7 +132,7 @@ function App() {
 												{key}: {value}
 											</Typography>
 									  ))}
-								<Modal listings={aucListings} />
+								{/* <Modal listings={aucListings} /> */}
 							</Grid>
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Typography

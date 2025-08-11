@@ -147,6 +147,7 @@ function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 			priceArray.push(parseFloat(value));
 		}
 		const listingDetail = {
+			id: result.itemId,
 			title: result.title,
 			thumbnail: result.image.imageUrl,
 			url: result.itemWebUrl,
