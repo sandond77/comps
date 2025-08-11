@@ -41,9 +41,6 @@ export async function parseApiData(parsedFormData, formData, setNoResult) {
 	const filteredBinResults = unfilteredResults.data.bin;
 	const filteredAucResults = unfilteredResults.data.auction;
 
-	console.log(filteredAucResults);
-	console.log(filteredBinResults);
-
 	//Want to check initial query for results; queryEbay should return an non-empty object if theres results
 	const noBinResults =
 		filteredBinResults === null || filteredBinResults === undefined;
@@ -72,6 +69,7 @@ export async function parseApiData(parsedFormData, formData, setNoResult) {
 				setNoResult,
 				'bin'
 		  );
+
 	let aucStats = noAucResults
 		? null
 		: parseResults(
@@ -103,10 +101,10 @@ function parseResults(arr1, arr2, formData, setNoResult, id) {
 		}
 	});
 
-	console.log(arr1);
+	console.log(id, arr1);
 
 	if (arr2.length === 0) {
-		updateResult(id);
+		updateResult(setNoResult, id);
 		return;
 	}
 
@@ -120,20 +118,22 @@ function parseResults(arr1, arr2, formData, setNoResult, id) {
 		}
 	});
 
+	console.log(`price array ${priceArray}`);
 	if (priceArray.length === 0) {
-		updateResult(id);
+		updateResult(setNoResult, id);
 		return;
 	} else {
 		console.log(priceArray);
 		return {
 			Average: calculateAverage(priceArray).toFixed(2),
 			Lowest: Math.min(...priceArray).toFixed(2),
-			Highest: Math.max(...priceArray).toFixed(2)
+			Highest: Math.max(...priceArray).toFixed(2),
+			'Data Points': priceArray.length
 		};
 	}
 }
 
-function updateResult(id) {
+function updateResult(setNoResult, id) {
 	setNoResult((prev) => ({
 		...prev,
 		[id]: true

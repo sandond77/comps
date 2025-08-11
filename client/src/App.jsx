@@ -10,23 +10,27 @@ import {
 } from '@mui/material';
 import SearchForm from './SearchForm';
 import { parseApiData } from './utils/utils';
+import { useEffect } from 'react';
 
 function App() {
 	const [searchStatus, setSearchStatus] = useState(false);
+	const [statistics, setStatistics] = useState('');
 	const [queryTerm, setQueryTerm] = useState('');
 	const [noResult, setNoResult] = useState({
 		auc: true,
 		bin: true
 	});
 	const [aucStatsData, setAucStatsData] = useState({
-		average: '',
-		low: '',
-		high: ''
+		Average: '',
+		Low: '',
+		High: '',
+		'Data Points': 0
 	});
 	const [binStatsData, setBinStatsData] = useState({
-		average: '',
-		low: '',
-		high: ''
+		Average: '',
+		Low: '',
+		High: '',
+		'Data Points': 0
 	});
 	let theme = createTheme();
 	theme = responsiveFontSizes(theme);
@@ -37,28 +41,30 @@ function App() {
 		const parsedFormData = formValues.filter(Boolean).join(' '); //removes any blank spaces from array and joins elements with a space
 		setQueryTerm(parsedFormData);
 		setSearchStatus(true);
+		setStatistics(await parseApiData(parsedFormData, formData, setNoResult));
+	};
 
-		let statistics = await parseApiData(parsedFormData, formData, setNoResult);
-		console.log(`stats`);
-		console.log(statistics);
-
+	//need useeffect to await state changes and refresh dom
+	useEffect(() => {
 		console.log(noResult.bin, noResult.auc);
 		if (noResult.bin === false) {
 			setBinStatsData({
-				average: statistics.bin.Average,
-				low: statistics.bin.Lowest,
-				high: statistics.bin.Highest
+				Average: statistics.bin.Average,
+				Low: statistics.bin.Lowest,
+				High: statistics.bin.Highest,
+				'Data Points': statistics.bin['Data Points']
 			});
 		}
 
 		if (noResult.auc === false) {
 			setAucStatsData({
-				average: statistics.auc.Average,
-				low: statistics.auc.Lowest,
-				high: statistics.auc.Highest
+				Average: statistics.auc.Average,
+				Low: statistics.auc.Lowest,
+				High: statistics.auc.Highest,
+				'Data Points': statistics.auc['Data Points']
 			});
 		}
-	};
+	}, [statistics, noResult]);
 
 	return (
 		<>
