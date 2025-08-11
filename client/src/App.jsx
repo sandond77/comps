@@ -85,14 +85,14 @@ function App() {
 				{searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Typography
-							variant="h5"
+							variant="h4"
 							gutterBottom
 							sx={{ marginTop: 4 }}
 							theme={theme}
 						>
-							Optimal Query String will be:
+							Optimal Query String:
 						</Typography>
-						<Typography variant="h4" color="primary" gutterBottom theme={theme}>
+						<Typography variant="h5" color="primary" gutterBottom theme={theme}>
 							{queryTerm}
 						</Typography>
 					</Box>
@@ -100,7 +100,7 @@ function App() {
 				{noResult.auc && noResult.bin && searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Typography
-							variant="h2"
+							variant="h4"
 							color="warning"
 							gutterBottom
 							sx={{ marginTop: 4 }}
@@ -119,7 +119,7 @@ function App() {
 								sx={{ borderRight: '1px solid', margin: '2' }}
 							>
 								<Typography
-									variant="h2"
+									variant="h4"
 									color="Success"
 									gutterBottom
 									sx={{ marginTop: 4 }}
@@ -127,18 +127,28 @@ function App() {
 								>
 									Active Auction Data:
 								</Typography>
-								{noResult.auc
-									? 'No Active Auction Data Found'
-									: Object.entries(aucStatsData).map(([key, value]) => (
-											<Typography key={key} variant="h5">
-												{key}: {value}
-											</Typography>
-									  ))}
-								<Modal listings={aucListings} />
+								{noResult.auc ? (
+									<Typography
+										variant="h5"
+										color="warning"
+										gutterBottom
+										sx={{ marginTop: 4 }}
+										theme={theme}
+									>
+										No Active Auction Data Found
+									</Typography>
+								) : (
+									Object.entries(aucStatsData).map(([key, value]) => (
+										<Typography key={key} variant="h5">
+											{key}: {value}
+										</Typography>
+									))
+								)}
+								{!noResult.auc && <Modal listings={aucListings} />}
 							</Grid>
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Typography
-									variant="h2"
+									variant="h4"
 									color="Success"
 									gutterBottom
 									sx={{ marginTop: 4 }}
@@ -146,14 +156,24 @@ function App() {
 								>
 									Active BIN Data:
 								</Typography>
-								{noResult.bin
-									? 'No Active Bin Data Found'
-									: Object.entries(binStatsData).map(([key, value]) => (
-											<Typography key={key} variant="h5">
-												{key}: {value}
-											</Typography>
-									  ))}
-								<Modal listings={binListings} />
+								{noResult.bin ? (
+									<Typography
+										variant="h5"
+										color="warning"
+										gutterBottom
+										sx={{ marginTop: 4 }}
+										theme={theme}
+									>
+										No Active BIN Data Found
+									</Typography>
+								) : (
+									Object.entries(binStatsData).map(([key, value]) => (
+										<Typography key={key} variant="h5">
+											{key}: {value}
+										</Typography>
+									))
+								)}
+								{!noResult.bin && <Modal listings={binListings} />}
 							</Grid>
 						</Grid>
 					</Box>
