@@ -73,6 +73,12 @@ export async function scrapeSoldListings(
 						const date =
 							item.querySelector('.s-item__ended-date')?.innerText ||
 							item.querySelector('.s-item__title--tagblock span')?.innerText ||
+							'' ||
+							item.querySelector('.su-styled-text.positive.default')
+								?.innerText ||
+							'' ||
+							item.querySelector('.s-item__caption--signal.POSITIVE span')
+								?.innerText ||
 							'';
 
 						const link = item.querySelector('.s-item__link')?.href || '';
