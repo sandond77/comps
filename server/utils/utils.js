@@ -60,7 +60,8 @@ export async function scrapeSoldListings(
 		url += '&LH_BIN=1';
 	}
 
-	await page.goto(url, { waitUntil: 'domcontentloaded' });
+	await page.goto(url, { waitUntil: 'networkidle2' });
+	// await page.waitForSelector('.s-item', { visible: true, timeout: 15000 });
 
 	try {
 		while (currentPage <= maxPages) {
@@ -70,7 +71,10 @@ export async function scrapeSoldListings(
 						const title = item.querySelector('.s-item__title')?.innerText || '';
 						const price = item.querySelector('.s-item__price')?.innerText || '';
 						const date =
-							item.querySelector('.s-item__ended-date')?.innerText || '';
+							item.querySelector('.s-item__ended-date')?.innerText ||
+							item.querySelector('.s-item__title--tagblock span')?.innerText ||
+							'';
+
 						const link = item.querySelector('.s-item__link')?.href || '';
 
 						return { title, price, date, link };
@@ -101,7 +105,7 @@ export async function scrapeSoldListings(
 		console.error('error', e);
 	} finally {
 		// console.log(results);
-		await browser.close();
+		// await browser.close();
 		return results;
 	}
 }

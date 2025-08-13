@@ -46,56 +46,63 @@ export async function parseApiData(
 	const unfilteredResults = await queryEbay(queryParams);
 	const filteredBinResults = unfilteredResults.data.bin;
 	const filteredAucResults = unfilteredResults.data.auction;
+	const filteredSoldBinResults = unfilteredResults.data.binSold;
+	const filteredSoldAucResults = unfilteredResults.data.aucSold;
 
-	//Want to check initial query for results; queryEbay should return an non-empty object if theres results
-	const noBinResults =
-		filteredBinResults === null || filteredBinResults === undefined;
-	const noAucResults =
-		filteredAucResults === null || filteredAucResults === undefined;
+	console.log('look here;');
+	// console.log(unfilteredResults);
+	console.log(filteredSoldBinResults);
+	console.log(filteredSoldAucResults);
 
-	console.log(noAucResults, noBinResults);
+	// //Want to check initial query for results; queryEbay should return an non-empty object if theres results
+	// const noBinResults =
+	// 	filteredBinResults === null || filteredBinResults === undefined;
+	// const noAucResults =
+	// 	filteredAucResults === null || filteredAucResults === undefined;
 
-	//update state immediately to render conditional "no results"
-	setNoResult({
-		bin: noBinResults,
-		auc: noAucResults
-	});
+	// // console.log(noAucResults, noBinResults);
 
-	if (noBinResults && noAucResults) return; //ends function if empty
+	// //update state immediately to render conditional "no results"
+	// setNoResult({
+	// 	bin: noBinResults,
+	// 	auc: noAucResults
+	// });
 
-	let resultBinArray = [];
-	let resultAucArray = [];
+	// if (noBinResults && noAucResults) return; //ends function if empty
 
-	let binStats = noBinResults
-		? null
-		: parseResults(
-				filteredBinResults,
-				resultBinArray,
-				formData,
-				setNoResult,
-				'bin',
-				setBinListings
-		  );
+	// let resultBinArray = [];
+	// let resultAucArray = [];
 
-	let aucStats = noAucResults
-		? null
-		: parseResults(
-				filteredAucResults,
-				resultAucArray,
-				formData,
-				setNoResult,
-				'auc',
-				setAucListings
-		  );
+	// let binStats = noBinResults
+	// 	? null
+	// 	: parseResults(
+	// 			filteredBinResults,
+	// 			resultBinArray,
+	// 			formData,
+	// 			setNoResult,
+	// 			'bin',
+	// 			setBinListings
+	// 	  );
 
-	return { bin: binStats, auc: aucStats };
+	// let aucStats = noAucResults
+	// 	? null
+	// 	: parseResults(
+	// 			filteredAucResults,
+	// 			resultAucArray,
+	// 			formData,
+	// 			setNoResult,
+	// 			'auc',
+	// 			setAucListings
+	// 	  );
+
+	// return { bin: binStats, auc: aucStats };
 }
 
 function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 	arr1.forEach((result) => {
 		let title = result.title.toLowerCase();
 		title = title.replace(/\s/g, ''); //Removes potential whitespace so query will return PSA10 or PSA 10
-		console.log(title);
+		// console.log(title);
 		const grade = formData.grade.toLowerCase();
 		const cardName = formData.cardName.toLowerCase().replace(/\s/g, '');
 		const cardNumber = formData.cardNumber.toLowerCase();
