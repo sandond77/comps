@@ -2,7 +2,7 @@ import axios from 'axios';
 import puppeteer from 'puppeteer';
 
 //current listing utils
-export async function browseAPI(query, ListingType) {
+export async function browseAPI(query, listingType) {
 	const token = await getEbayAccessToken();
 
 	let ebayUrl = `https://api.ebay.com/buy/browse/v1/item_summary/search?q=${encodeURIComponent(
@@ -86,6 +86,7 @@ export async function scrapeSoldListings(
 			);
 
 			results = results.concat(pageListings);
+			const nextLink = await page.$('a.pagination__next');
 			if (nextLink && currentPage < maxPages) {
 				await Promise.all([
 					nextLink.click(),
@@ -99,8 +100,7 @@ export async function scrapeSoldListings(
 	} catch (e) {
 		console.error('error', e);
 	} finally {
-		await new Promise((r) => setTimeout(r, 10000));
-		console.log(results);
+		// console.log(results);
 		await browser.close();
 		return results;
 	}

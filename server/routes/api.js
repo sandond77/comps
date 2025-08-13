@@ -3,13 +3,14 @@ import { browseAPI, scrapeSoldListings } from '../utils/utils.js';
 
 const router = express.Router();
 
-// /api/search?q=charizard
+//try routes
 router.get('/search', async (req, res) => {
 	const query = req.query.q;
 
 	try {
-		// const binResults = await browseAPI(query, 'FIXED_PRICE');
-		// const aucResults = await browseAPI(query, 'AUCTION');
+		const binResults = await browseAPI(query, 'FIXED_PRICE');
+		await new Promise((r) => setTimeout(r, 5000));
+		const aucResults = await browseAPI(query, 'AUCTION');
 
 		const binSoldResults = await scrapeSoldListings(
 			query,
@@ -17,17 +18,18 @@ router.get('/search', async (req, res) => {
 			3,
 			'FIXED_PRICE'
 		);
-		// const aucSoldResults = await scrapeSoldListings(query, 12, 3, 'AUCTION');
+		const aucSoldResults = await scrapeSoldListings(query, 12, 3, 'AUCTION');
 
-		// const combinedResults = {
-		// 	bin: binResults.data.itemSummaries,
-		// 	auction: aucResults.data.itemSummaries,
-		// 	binSold: binSoldResults.data.itemSummaries,
-		// 	aucSold: aucSoldResults.data.itemSummaries
-		// };
+		const combinedResults = {
+			bin: binResults.data.itemSummaries,
+			auction: aucResults.data.itemSummaries,
+			binSold: binSoldResults,
+			aucSold: aucSoldResults
+		};
 
-		res.json(binSoldResults);
-		// res.json(combinedResults);
+		// res.json(binSoldResults);
+		// res.json(aucSoldResults);
+		res.json(combinedResults);
 	} catch (err) {
 		console.error(err.response?.data || err.message);
 		res.status(500).json({ error: 'eBay API call failed' });
