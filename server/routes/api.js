@@ -20,6 +20,7 @@ router.get('/search', async (req, res) => {
 			binSold: scrapeResults.binResults,
 			aucSold: scrapeResults.aucResults
 		};
+		// console.log(combinedResults);
 		res.json(combinedResults);
 	} catch (err) {
 		console.error(err.response?.data || err.message);

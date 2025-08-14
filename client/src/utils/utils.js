@@ -3,7 +3,8 @@ import axios from 'axios';
 export async function queryEbay(params) {
 	try {
 		const ebaySearch = await axios.get(
-			`http://localhost:3001/api/search?${params}`
+			`http://localhost:3001/api/search?${params}`,
+			{ timeout: 20000 }
 		);
 		return ebaySearch;
 	} catch (error) {
@@ -39,7 +40,9 @@ export async function parseApiData(
 	formData,
 	setNoResult,
 	setAucListings,
-	setBinListings
+	setBinListings,
+	setSoldAucListings,
+	setSoldBinListings
 ) {
 	const queryParams = new URLSearchParams({ q: parsedFormData }).toString(); //using a const declared value instead of state value due to delays in state update
 
@@ -54,48 +57,77 @@ export async function parseApiData(
 	console.log(filteredSoldBinResults);
 	console.log(filteredSoldAucResults);
 
-	// //Want to check initial query for results; queryEbay should return an non-empty object if theres results
-	// const noBinResults =
-	// 	filteredBinResults === null || filteredBinResults === undefined;
-	// const noAucResults =
-	// 	filteredAucResults === null || filteredAucResults === undefined;
+	// Want to check initial query for results; queryEbay should return an non-empty object if theres results
+	const noBinResults =
+		filteredBinResults === null || filteredBinResults === undefined;
+	const noAucResults =
+		filteredAucResults === null || filteredAucResults === undefined;
+	const noBinSoldResults =
+		filteredSoldBinResults === null || filteredSoldBinResults === undefined;
+	const noAucSoldResults =
+		filteredSoldAucResults === null || filteredSoldAucResults === undefined;
 
-	// // console.log(noAucResults, noBinResults);
+	// update state immediately to render conditional "no results"
+	setNoResult({
+		bin: noBinResults,
+		auc: noAucResults
+	});
 
-	// //update state immediately to render conditional "no results"
-	// setNoResult({
-	// 	bin: noBinResults,
-	// 	auc: noAucResults
-	// });
+	if (noBinResults && noAucResults) return; //ends function if empty
 
-	// if (noBinResults && noAucResults) return; //ends function if empty
+	let resultBinArray = [];
+	let resultAucArray = [];
+	let resultSoldBinArray = [];
+	let resultSoldAucArray = [];
 
-	// let resultBinArray = [];
-	// let resultAucArray = [];
+	let binStats = noBinResults
+		? null
+		: parseResults(
+				filteredBinResults,
+				resultBinArray,
+				formData,
+				setNoResult,
+				'bin',
+				setBinListings
+		  );
 
-	// let binStats = noBinResults
-	// 	? null
-	// 	: parseResults(
-	// 			filteredBinResults,
-	// 			resultBinArray,
-	// 			formData,
-	// 			setNoResult,
-	// 			'bin',
-	// 			setBinListings
-	// 	  );
+	let aucStats = noAucResults
+		? null
+		: parseResults(
+				filteredAucResults,
+				resultAucArray,
+				formData,
+				setNoResult,
+				'auc',
+				setAucListings
+		  );
 
-	// let aucStats = noAucResults
-	// 	? null
-	// 	: parseResults(
-	// 			filteredAucResults,
-	// 			resultAucArray,
-	// 			formData,
-	// 			setNoResult,
-	// 			'auc',
-	// 			setAucListings
-	// 	  );
+	let binSoldStats = noBinResults
+		? null
+		: parseResults(
+				filteredBinResults,
+				resultSoldBinArray,
+				formData,
+				setNoResult,
+				'bin',
+				setSoldBinListings
+		  );
 
-	// return { bin: binStats, auc: aucStats };
+	let aucSoldStats = noAucResults
+		? null
+		: parseResults(
+				filteredAucResults,
+				resultSoldAucArray,
+				formData,
+				setNoResult,
+				'auc',
+				setSoldAucListings
+		  );
+
+	console.log(binSoldStats);
+	console.log(aucSoldStats);
+
+	return { bin: binStats, auc: aucStats };
 }
 
 function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {

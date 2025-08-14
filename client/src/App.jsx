@@ -25,6 +25,8 @@ function App() {
 	const [binStatsData, setBinStatsData] = useState('');
 	const [aucListings, setAucListings] = useState('');
 	const [binListings, setBinListings] = useState('');
+	const [aucSoldListings, setSoldAucListings] = useState('');
+	const [binSoldListings, setSoldBinListings] = useState('');
 	let theme = createTheme();
 	theme = responsiveFontSizes(theme);
 
@@ -40,7 +42,9 @@ function App() {
 				formData,
 				setNoResult,
 				setAucListings,
-				setBinListings
+				setBinListings,
+				setSoldBinListings,
+				setSoldAucListings
 			)
 		);
 	};
