@@ -50,7 +50,7 @@ export async function parseApiData(
 	const filteredSoldAucResults = unfilteredResults.data.aucSold;
 
 	console.log('look here;');
-	// console.log(unfilteredResults);
+	console.log(unfilteredResults);
 	console.log(filteredSoldBinResults);
 	console.log(filteredSoldAucResults);
 

@@ -39,31 +39,113 @@ export async function getEbayAccessToken() {
 }
 
 //sold listing utils
-export async function scrapeSoldListings(
-	query,
-	sortOrder = 12,
-	maxPages = 3,
-	listingType
-) {
-	const browser = await puppeteer.launch({ headless: false }); //set headless to false to see automation
+// export async function scrapeSoldListings(
+// 	query,
+// 	sortOrder = 12,
+// 	maxPages = 3,
+// 	listingType
+// ) {
+// 	const browser = await puppeteer.launch({ headless: true }); //set headless to false to see automation
+// 	const page = await browser.newPage();
+
+// 	let results = [];
+// 	let currentPage = 1;
+// 	let url = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(
+// 		query
+// 	)}&LH_Sold=1&LH_Complete=1&_sop=${sortOrder}`;
+
+// 	if (listingType === 'AUCTION') {
+// 		url += '&LH_Auction=1';
+// 	} else if (listingType === 'FIXED_PRICE') {
+// 		url += '&LH_BIN=1';
+// 	}
+
+// 	await page.goto(url, { waitUntil: 'networkidle2' });
+// 	// await page.waitForSelector('.s-item', { visible: true, timeout: 15000 });
+
+// 	try {
+// 		while (currentPage <= maxPages) {
+// 			const pageListings = await page.$$eval('.s-item', (items) =>
+// 				items
+// 					.map((item) => {
+// 						const title = item.querySelector('.s-item__title')?.innerText || '';
+// 						const price = item.querySelector('.s-item__price')?.innerText || '';
+// 						const date =
+// 							item.querySelector('.s-item__ended-date')?.innerText ||
+// 							item.querySelector('.s-item__title--tagblock span')?.innerText ||
+// 							'' ||
+// 							item.querySelector('.su-styled-text.positive.default')
+// 								?.innerText ||
+// 							'' ||
+// 							item.querySelector('.s-item__caption--signal.POSITIVE span')
+// 								?.innerText ||
+// 							'';
+
+// 						const link = item.querySelector('.s-item__link')?.href || '';
+
+// 						return { title, price, date, link };
+// 					})
+// 					.filter((item) => {
+// 						return (
+// 							item.title &&
+// 							!item.title.toLowerCase().includes('shop on ebay') && //to remove ads
+// 							item.price &&
+// 							item.link
+// 						);
+// 					})
+// 			);
+
+// 			results = results.concat(pageListings);
+// 			const nextLink = await page.$('a.pagination__next');
+// 			if (nextLink && currentPage < maxPages) {
+// 				await Promise.all([
+// 					nextLink.click(),
+// 					await page.waitForSelector('.s-item', { visible: true })
+// 				]);
+// 				currentPage++;
+// 			} else {
+// 				break;
+// 			}
+// 		}
+// 	} catch (e) {
+// 		console.error('error', e);
+// 	} finally {
+// 		// console.log(results);
+// 		// await browser.close();
+// 		return results;
+// 	}
+// }
+
+export async function scrapeSoldListings(query, sortOrder = 12, maxPages = 3) {
+	const browser = await puppeteer.launch({ headless: true }); //set headless to false to see automation
 	const page = await browser.newPage();
 
-	let results = [];
-	let currentPage = 1;
+	await page.setUserAgent(
+		'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+	);
+
 	let url = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(
 		query
 	)}&LH_Sold=1&LH_Complete=1&_sop=${sortOrder}`;
 
-	if (listingType === 'AUCTION') {
-		url += '&LH_Auction=1';
-	} else if (listingType === 'FIXED_PRICE') {
-		url += '&LH_BIN=1';
-	}
+	const urlAuction = (url += '&LH_Auction=1');
+	const urlBin = (url += '&LH_BIN=1');
 
+	let aucResults = await scrape(page, urlAuction, maxPages);
+	let binResults = await scrape(page, urlBin, maxPages);
+
+	await browser.close();
+
+	return { aucResults, binResults };
+}
+
+async function scrape(page, url, maxPages) {
 	await page.goto(url, { waitUntil: 'networkidle2' });
-	// await page.waitForSelector('.s-item', { visible: true, timeout: 15000 });
-
+	await page.waitForSelector('.s-item', { visible: true, timeout: 15000 });
+	await new Promise((r) => setTimeout(r, 2000)); //to wait for ebay to further load listings via JS
+	let results = [];
 	try {
+		let currentPage = 1;
 		while (currentPage <= maxPages) {
 			const pageListings = await page.$$eval('.s-item', (items) =>
 				items
@@ -110,8 +192,6 @@ export async function scrapeSoldListings(
 	} catch (e) {
 		console.error('error', e);
 	} finally {
-		// console.log(results);
-		// await browser.close();
 		return results;
 	}
 }

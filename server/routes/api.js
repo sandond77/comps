@@ -8,27 +8,18 @@ router.get('/search', async (req, res) => {
 	const query = req.query.q;
 
 	try {
-		const binResults = await browseAPI(query, 'FIXED_PRICE');
-		await new Promise((r) => setTimeout(r, 5000));
-		const aucResults = await browseAPI(query, 'AUCTION');
-
-		const binSoldResults = await scrapeSoldListings(
-			query,
-			12,
-			3,
-			'FIXED_PRICE'
-		);
-		const aucSoldResults = await scrapeSoldListings(query, 12, 3, 'AUCTION');
+		let [binResults, aucResults, scrapeResults] = await Promise.all([
+			browseAPI(query, 'FIXED_PRICE'),
+			browseAPI(query, 'AUCTION'),
+			scrapeSoldListings(query, 12, 3)
+		]);
 
 		const combinedResults = {
 			bin: binResults.data.itemSummaries,
 			auction: aucResults.data.itemSummaries,
-			binSold: binSoldResults,
-			aucSold: aucSoldResults
+			binSold: scrapeResults.binResults,
+			aucSold: scrapeResults.aucResults
 		};
-
-		// res.json(binSoldResults);
-		// res.json(aucSoldResults);
 		res.json(combinedResults);
 	} catch (err) {
 		console.error(err.response?.data || err.message);
