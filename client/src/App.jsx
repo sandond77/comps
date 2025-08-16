@@ -36,6 +36,16 @@ function App() {
 
 	const handleSubmit = async (formData) => {
 		console.log('form submitted');
+		setQueryTerm('');
+		setSearchStatus(false);
+		setAucStatsData('');
+		setBinStatsData('');
+		setAucListings('');
+		setBinListings('');
+		setBinSoldListings('');
+		setAucSoldListings('');
+		setAucSoldStatsData('');
+		setBinSoldStatsData('');
 		const formValues = Object.values(formData); //converts formData object into an array of values
 		const parsedFormData = formValues.filter(Boolean).join(' '); //removes any blank spaces from array and joins elements with a space
 		setQueryTerm(parsedFormData);
@@ -238,7 +248,7 @@ function App() {
 										</Typography>
 									))
 								)}
-								{/* {!noResult.auc && <Modal listings={aucListings} />} */}
+								{!noResult.soldAuc && <Modal listings={aucSoldListings} />}
 							</Grid>
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Typography
@@ -267,7 +277,7 @@ function App() {
 										</Typography>
 									))
 								)}
-								{/* {!noResult.bin && <Modal listings={binListings} />} */}
+								{!noResult.soldBin && <Modal listings={binSoldListings} />}
 							</Grid>
 						</Grid>
 					</Box>

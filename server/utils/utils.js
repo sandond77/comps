@@ -41,7 +41,7 @@ export async function getEbayAccessToken() {
 //sold listing utils
 export async function scrapeSoldListings(query, sortOrder = 12, maxPages = 3) {
 	const browser = await puppeteer.launch({
-		headless: 'false', // or true for newer versions
+		headless: true, // false to see browser
 		args: [
 			'--no-sandbox',
 			'--disable-setuid-sandbox',
@@ -51,7 +51,7 @@ export async function scrapeSoldListings(query, sortOrder = 12, maxPages = 3) {
 			'--window-size=1920,1080'
 		]
 	});
-
+	// const browser = await puppeteer.launch({ headless: false });
 	const page = await browser.newPage();
 
 	// This makes headless Chrome look like a normal Chrome
@@ -70,8 +70,8 @@ export async function scrapeSoldListings(query, sortOrder = 12, maxPages = 3) {
 		query
 	)}&LH_Sold=1&LH_Complete=1&_sop=${sortOrder}`;
 
-	const urlAuction = (url += '&LH_Auction=1');
-	const urlBin = (url += '&LH_BIN=1');
+	const urlAuction = url + '&LH_Auction=1';
+	const urlBin = url + '&LH_BIN=1';
 
 	let aucResults = await scrape(page, urlAuction, maxPages);
 	let binResults = await scrape(page, urlBin, maxPages);
@@ -85,7 +85,11 @@ export async function scrapeSoldListings(query, sortOrder = 12, maxPages = 3) {
 async function scrape(page, url, maxPages) {
 	await page.goto(url, { waitUntil: 'networkidle2' });
 	await page.waitForSelector('.s-item', { visible: true, timeout: 15000 });
-	await new Promise((r) => setTimeout(r, 2000)); //to wait for ebay to further load listings via JS
+	// await page.waitForSelector('.su-card-container__attributes__secondary', {
+	// 	visible: true,
+	// 	timeout: 15000
+	// });
+
 	let results = [];
 	try {
 		let currentPage = 1;
@@ -101,20 +105,30 @@ async function scrape(page, url, maxPages) {
 						const soldDate =
 							item.querySelector('.s-item__ended-date')?.innerText ||
 							item.querySelector('.s-item__title--tagblock span')?.innerText ||
-							'' ||
 							item.querySelector('.su-styled-text.positive.default')
 								?.innerText ||
-							'' ||
 							item.querySelector('.s-item__caption--signal.POSITIVE span')
 								?.innerText ||
 							'';
+
 						let match = soldDate.match(/([A-Za-z]+ \d{1,2}, \d{4})/); // "Jul 15, 2025"
 						let dateObj = match ? new Date(match[1]) : null;
 						const date = dateObj ? dateObj.toISOString().split('T')[0] : '';
+						let link = item.querySelector('.s-item__link')?.href || '';
+						const matchID = link.match(/\/itm\/(\d+)/);
+						const numericId = matchID ? matchID[1] : '';
+						const itemId = numericId ? `v1|${numericId}|0` : '';
 
-						const link = item.querySelector('.s-item__link')?.href || '';
+						link = numericId ? `https://www.ebay.com/itm/${numericId}` : '';
 
-						return { title, price, date, link };
+						const spans = item.querySelectorAll(
+							'.s-item__detail.s-item__detail--secondary .s-item__etrs-text span.PRIMARY'
+						);
+						const sellerUsername = spans[0]?.innerText.trim() || '';
+						console.log('seller', sellerUsername);
+						const seller = { username: sellerUsername };
+
+						return { itemId, title, price, date, link, seller };
 					})
 					.filter((item) => {
 						return (
