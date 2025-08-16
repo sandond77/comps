@@ -98,7 +98,7 @@ async function scrape(page, url, maxPages) {
 							value: item.querySelector('.s-item__price')?.innerText || '',
 							currency: 'USD'
 						};
-						const date =
+						const soldDate =
 							item.querySelector('.s-item__ended-date')?.innerText ||
 							item.querySelector('.s-item__title--tagblock span')?.innerText ||
 							'' ||
@@ -108,6 +108,8 @@ async function scrape(page, url, maxPages) {
 							item.querySelector('.s-item__caption--signal.POSITIVE span')
 								?.innerText ||
 							'';
+						let match = soldDate.match(/([A-Za-z]+ \d{1,2}, \d{4})/); // "Jul 15, 2025"
+						let date = match ? new Date(match[1]) : null;
 
 						const link = item.querySelector('.s-item__link')?.href || '';
 
