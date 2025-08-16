@@ -76,7 +76,8 @@ export async function scrapeSoldListings(query, sortOrder = 12, maxPages = 3) {
 	let aucResults = await scrape(page, urlAuction, maxPages);
 	let binResults = await scrape(page, urlBin, maxPages);
 
-	await browser.close();
+	await page.close(); // close the page
+	await browser.close(); // close the browser
 
 	return { aucResults, binResults };
 }
@@ -93,7 +94,10 @@ async function scrape(page, url, maxPages) {
 				items
 					.map((item) => {
 						const title = item.querySelector('.s-item__title')?.innerText || '';
-						const price = item.querySelector('.s-item__price')?.innerText || '';
+						const price = {
+							value: item.querySelector('.s-item__price')?.innerText || '',
+							currency: 'USD'
+						};
 						const date =
 							item.querySelector('.s-item__ended-date')?.innerText ||
 							item.querySelector('.s-item__title--tagblock span')?.innerText ||

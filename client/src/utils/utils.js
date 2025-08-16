@@ -2,11 +2,15 @@ import axios from 'axios';
 
 export async function queryEbay(params) {
 	try {
-		const ebaySearch = await axios.get(
-			`http://localhost:3001/api/search?${params}`,
-			{ timeout: 20000 }
+		// const ebaySearch = await axios.get(
+		// 	`http://localhost:3001/api/search?${params}`
+		// );
+
+		const ebayScrape = await axios.get(
+			`http://localhost:3001/api/scrape?${params}`
 		);
-		return ebaySearch;
+		return ebayScrape;
+		// return { ebaySearch, ebayScrape };
 	} catch (error) {
 		console.error(error);
 	}
@@ -47,21 +51,27 @@ export async function parseApiData(
 	const queryParams = new URLSearchParams({ q: parsedFormData }).toString(); //using a const declared value instead of state value due to delays in state update
 
 	const unfilteredResults = await queryEbay(queryParams);
-	const filteredBinResults = unfilteredResults.data.bin;
-	const filteredAucResults = unfilteredResults.data.auction;
+	// const filteredBinResults = unfilteredResults.ebaySearch.data.bin;
+	// const filteredAucResults = unfilteredResults.ebaySearch.data.auction;
+	// const filteredSoldBinResults = unfilteredResults.ebayScrape.binSold;
+	// const filteredSoldAucResults = unfilteredResults.ebayScrape.aucSold;
 	const filteredSoldBinResults = unfilteredResults.data.binSold;
 	const filteredSoldAucResults = unfilteredResults.data.aucSold;
 
-	console.log('look here;');
+	console.log('look here ----- ');
 	console.log(unfilteredResults);
-	console.log(filteredSoldBinResults);
-	console.log(filteredSoldAucResults);
+	// console.log(unfilteredResults.ebayScrape);
+	// console.log(unfilteredResults.ebaySearch);
+	// console.log(filteredBinResults);
+	// console.log(filteredAucResults);
+	// console.log(filteredSoldAucResults);
+	// console.log(filteredSoldBinResults);
 
 	// Want to check initial query for results; queryEbay should return an non-empty object if theres results
-	const noBinResults =
-		filteredBinResults === null || filteredBinResults === undefined;
-	const noAucResults =
-		filteredAucResults === null || filteredAucResults === undefined;
+	// const noBinResults =
+	// 	filteredBinResults === null || filteredBinResults === undefined;
+	// const noAucResults =
+	// 	filteredAucResults === null || filteredAucResults === undefined;
 	const noBinSoldResults =
 		filteredSoldBinResults === null || filteredSoldBinResults === undefined;
 	const noAucSoldResults =
@@ -69,43 +79,45 @@ export async function parseApiData(
 
 	// update state immediately to render conditional "no results"
 	setNoResult({
-		bin: noBinResults,
-		auc: noAucResults
+		// bin: noBinResults,
+		// auc: noAucResults,
+		soldBin: noBinSoldResults,
+		soldAuc: noAucSoldResults
 	});
 
-	if (noBinResults && noAucResults) return; //ends function if empty
+	// if (noBinResults && noAucResults) return; //ends function if empty
 
-	let resultBinArray = [];
-	let resultAucArray = [];
+	// let resultBinArray = [];
+	// let resultAucArray = [];
 	let resultSoldBinArray = [];
 	let resultSoldAucArray = [];
 
-	let binStats = noBinResults
-		? null
-		: parseResults(
-				filteredBinResults,
-				resultBinArray,
-				formData,
-				setNoResult,
-				'bin',
-				setBinListings
-		  );
+	// let binStats = noBinResults
+	// 	? null
+	// 	: parseResults(
+	// 			filteredBinResults,
+	// 			resultBinArray,
+	// 			formData,
+	// 			setNoResult,
+	// 			'bin',
+	// 			setBinListings
+	// 	  );
 
-	let aucStats = noAucResults
-		? null
-		: parseResults(
-				filteredAucResults,
-				resultAucArray,
-				formData,
-				setNoResult,
-				'auc',
-				setAucListings
-		  );
+	// let aucStats = noAucResults
+	// 	? null
+	// 	: parseResults(
+	// 			filteredAucResults,
+	// 			resultAucArray,
+	// 			formData,
+	// 			setNoResult,
+	// 			'auc',
+	// 			setAucListings
+	// 	  );
 
-	let binSoldStats = noBinResults
+	let binSoldStats = noBinSoldResults
 		? null
 		: parseResults(
-				filteredBinResults,
+				filteredSoldBinResults,
 				resultSoldBinArray,
 				formData,
 				setNoResult,
@@ -113,10 +125,10 @@ export async function parseApiData(
 				setSoldBinListings
 		  );
 
-	let aucSoldStats = noAucResults
+	let aucSoldStats = noAucSoldResults
 		? null
 		: parseResults(
-				filteredAucResults,
+				filteredSoldAucResults,
 				resultSoldAucArray,
 				formData,
 				setNoResult,
@@ -124,17 +136,21 @@ export async function parseApiData(
 				setSoldAucListings
 		  );
 
+	console.log('look here 2');
+
 	console.log(binSoldStats);
 	console.log(aucSoldStats);
 
-	return { bin: binStats, auc: aucStats };
+	console.log('done');
+	// return { bin: binStats, auc: aucStats };
+	return { binSold: binSoldStats, aucSold: aucSoldStats };
 }
 
 function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 	arr1.forEach((result) => {
+		// console.log(JSON.stringify(result.title));
 		let title = result.title.toLowerCase();
 		title = title.replace(/\s/g, ''); //Removes potential whitespace so query will return PSA10 or PSA 10
-		// console.log(title);
 		const grade = formData.grade.toLowerCase();
 		const cardName = formData.cardName.toLowerCase().replace(/\s/g, '');
 		const cardNumber = formData.cardNumber.toLowerCase();
@@ -150,6 +166,7 @@ function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 		// 	title.includes(cardName),
 		// 	title.includes(cardNumber)
 		// );
+
 		if (
 			title.includes(grade) &&
 			title.includes(cardName) &&
@@ -159,7 +176,7 @@ function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 		}
 	});
 
-	console.log(id, arr1);
+	console.log(id, arr2);
 
 	if (arr2.length === 0) {
 		updateResult(setNoResult, id);
@@ -171,23 +188,26 @@ function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 
 	//add if check to look for empty array
 	arr2.forEach((result) => {
+		console.log(result.price);
 		const { value, currency } = result.price || result.currentBidPrice;
+		value = value.replace(/[^0-9.]/g, '');
 		if (currency === 'USD') {
+			console.log(value);
 			priceArray.push(parseFloat(value));
 
 			const listingDetail = {
-				id: result.itemId,
-				title: result.title,
-				thumbnail: result.image.imageUrl,
-				url: result.itemWebUrl,
-				seller: result.seller.username,
-				price: parseFloat(value)
+				id: result.itemId || '',
+				title: result.title || '',
+				url: result.itemWebUrl || result.link || '',
+				seller: result.seller?.username || '', // ✅ optional chaining
+				price: parseFloat(value) // fallback to 0 if value is missing
 			};
 
 			listingsArray.push(listingDetail);
 		}
 	});
-	// console.log(listingsArray);
+	console.log('listing array');
+	console.log(listingsArray);
 	if (priceArray.length === 0) {
 		updateResult(setNoResult, id);
 		return;
