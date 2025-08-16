@@ -36,6 +36,12 @@ function App() {
 
 	const handleSubmit = async (formData) => {
 		console.log('form submitted');
+		setNoResult({
+			auc: true,
+			bin: true,
+			soldBin: true,
+			soldAuc: true
+		});
 		setQueryTerm('');
 		setSearchStatus(false);
 		setAucStatsData('');
@@ -57,8 +63,8 @@ function App() {
 				setNoResult,
 				setAucListings,
 				setBinListings,
-				setBinSoldListings,
-				setAucSoldListings
+				setAucSoldListings,
+				setBinSoldListings
 			)
 		);
 		console.log(statistics);
