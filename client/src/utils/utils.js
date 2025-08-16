@@ -88,7 +88,7 @@ export async function parseApiData(
 
 	let binStats = noBinResults
 		? null
-		: parseResults(
+		: await parseResults(
 				filteredBinResults,
 				resultBinArray,
 				formData,
@@ -99,7 +99,7 @@ export async function parseApiData(
 
 	let aucStats = noAucResults
 		? null
-		: parseResults(
+		: await parseResults(
 				filteredAucResults,
 				resultAucArray,
 				formData,
@@ -110,7 +110,7 @@ export async function parseApiData(
 
 	let binSoldStats = noBinSoldResults
 		? null
-		: parseResults(
+		: await parseResults(
 				filteredSoldBinResults,
 				resultSoldBinArray,
 				formData,
@@ -121,7 +121,7 @@ export async function parseApiData(
 
 	let aucSoldStats = noAucSoldResults
 		? null
-		: parseResults(
+		: await parseResults(
 				filteredSoldAucResults,
 				resultSoldAucArray,
 				formData,
@@ -143,7 +143,14 @@ export async function parseApiData(
 	};
 }
 
-function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
+async function parseResults(
+	arr1,
+	arr2,
+	formData,
+	setNoResult,
+	id,
+	stateListing
+) {
 	arr1.forEach((result) => {
 		let title = result.title.toLowerCase();
 		title = title.replace(/\s/g, ''); //Removes potential whitespace so query will return PSA10 or PSA 10
