@@ -189,7 +189,7 @@ function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 	//add if check to look for empty array
 	arr2.forEach((result) => {
 		console.log(result.price);
-		const { value, currency } = result.price || result.currentBidPrice;
+		let { value, currency } = result.price || result.currentBidPrice;
 		value = value.replace(/[^0-9.]/g, '');
 		if (currency === 'USD') {
 			console.log(value);
@@ -200,7 +200,8 @@ function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 				title: result.title || '',
 				url: result.itemWebUrl || result.link || '',
 				seller: result.seller?.username || '', // ✅ optional chaining
-				price: parseFloat(value) // fallback to 0 if value is missing
+				price: parseFloat(value), // fallback to 0 if value is missing,
+				date: result.date || ''
 			};
 
 			listingsArray.push(listingDetail);
