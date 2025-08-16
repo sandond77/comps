@@ -2,15 +2,15 @@ import axios from 'axios';
 
 export async function queryEbay(params) {
 	try {
-		// const ebaySearch = await axios.get(
-		// 	`http://localhost:3001/api/search?${params}`
-		// );
+		const ebaySearch = await axios.get(
+			`http://localhost:3001/api/search?${params}`
+		);
 
 		const ebayScrape = await axios.get(
 			`http://localhost:3001/api/scrape?${params}`
 		);
-		return ebayScrape;
-		// return { ebaySearch, ebayScrape };
+		// return ebayScrape;
+		return { ebaySearch, ebayScrape };
 	} catch (error) {
 		console.error(error);
 	}
@@ -51,27 +51,20 @@ export async function parseApiData(
 	const queryParams = new URLSearchParams({ q: parsedFormData }).toString(); //using a const declared value instead of state value due to delays in state update
 
 	const unfilteredResults = await queryEbay(queryParams);
-	// const filteredBinResults = unfilteredResults.ebaySearch.data.bin;
-	// const filteredAucResults = unfilteredResults.ebaySearch.data.auction;
-	// const filteredSoldBinResults = unfilteredResults.ebayScrape.binSold;
-	// const filteredSoldAucResults = unfilteredResults.ebayScrape.aucSold;
-	const filteredSoldBinResults = unfilteredResults.data.binSold;
-	const filteredSoldAucResults = unfilteredResults.data.aucSold;
+	const filteredBinResults = unfilteredResults.ebaySearch.data.bin;
+	const filteredAucResults = unfilteredResults.ebaySearch.data.auction;
+	const filteredSoldBinResults = unfilteredResults.ebayScrape.data.binSold;
+	const filteredSoldAucResults = unfilteredResults.ebayScrape.data.aucSold;
 
 	console.log('look here ----- ');
-	console.log(unfilteredResults);
-	// console.log(unfilteredResults.ebayScrape);
-	// console.log(unfilteredResults.ebaySearch);
-	// console.log(filteredBinResults);
-	// console.log(filteredAucResults);
-	// console.log(filteredSoldAucResults);
-	// console.log(filteredSoldBinResults);
+	console.log(unfilteredResults.ebayScrape);
+	console.log(unfilteredResults.ebaySearch);
 
 	// Want to check initial query for results; queryEbay should return an non-empty object if theres results
-	// const noBinResults =
-	// 	filteredBinResults === null || filteredBinResults === undefined;
-	// const noAucResults =
-	// 	filteredAucResults === null || filteredAucResults === undefined;
+	const noBinResults =
+		filteredBinResults === null || filteredBinResults === undefined;
+	const noAucResults =
+		filteredAucResults === null || filteredAucResults === undefined;
 	const noBinSoldResults =
 		filteredSoldBinResults === null || filteredSoldBinResults === undefined;
 	const noAucSoldResults =
@@ -79,40 +72,41 @@ export async function parseApiData(
 
 	// update state immediately to render conditional "no results"
 	setNoResult({
-		// bin: noBinResults,
-		// auc: noAucResults,
+		bin: noBinResults,
+		auc: noAucResults,
 		soldBin: noBinSoldResults,
 		soldAuc: noAucSoldResults
 	});
 
-	// if (noBinResults && noAucResults) return; //ends function if empty
+	if (noBinResults && noAucResults && noAucSoldResults && noAucSoldResults)
+		return; //ends function if empty
 
-	// let resultBinArray = [];
-	// let resultAucArray = [];
+	let resultBinArray = [];
+	let resultAucArray = [];
 	let resultSoldBinArray = [];
 	let resultSoldAucArray = [];
 
-	// let binStats = noBinResults
-	// 	? null
-	// 	: parseResults(
-	// 			filteredBinResults,
-	// 			resultBinArray,
-	// 			formData,
-	// 			setNoResult,
-	// 			'bin',
-	// 			setBinListings
-	// 	  );
+	let binStats = noBinResults
+		? null
+		: parseResults(
+				filteredBinResults,
+				resultBinArray,
+				formData,
+				setNoResult,
+				'bin',
+				setBinListings
+		  );
 
-	// let aucStats = noAucResults
-	// 	? null
-	// 	: parseResults(
-	// 			filteredAucResults,
-	// 			resultAucArray,
-	// 			formData,
-	// 			setNoResult,
-	// 			'auc',
-	// 			setAucListings
-	// 	  );
+	let aucStats = noAucResults
+		? null
+		: parseResults(
+				filteredAucResults,
+				resultAucArray,
+				formData,
+				setNoResult,
+				'auc',
+				setAucListings
+		  );
 
 	let binSoldStats = noBinSoldResults
 		? null
@@ -121,7 +115,7 @@ export async function parseApiData(
 				resultSoldBinArray,
 				formData,
 				setNoResult,
-				'bin',
+				'soldBin',
 				setSoldBinListings
 		  );
 
@@ -132,23 +126,25 @@ export async function parseApiData(
 				resultSoldAucArray,
 				formData,
 				setNoResult,
-				'auc',
+				'soldAuc',
 				setSoldAucListings
 		  );
 
 	console.log('look here 2');
-
 	console.log(binSoldStats);
 	console.log(aucSoldStats);
-
 	console.log('done');
-	// return { bin: binStats, auc: aucStats };
-	return { binSold: binSoldStats, aucSold: aucSoldStats };
+
+	return {
+		bin: binStats,
+		auc: aucStats,
+		binSold: binSoldStats,
+		aucSold: aucSoldStats
+	};
 }
 
 function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 	arr1.forEach((result) => {
-		// console.log(JSON.stringify(result.title));
 		let title = result.title.toLowerCase();
 		title = title.replace(/\s/g, ''); //Removes potential whitespace so query will return PSA10 or PSA 10
 		const grade = formData.grade.toLowerCase();
@@ -188,32 +184,40 @@ function parseResults(arr1, arr2, formData, setNoResult, id, stateListing) {
 
 	//add if check to look for empty array
 	arr2.forEach((result) => {
-		console.log(result.price);
 		let { value, currency } = result.price || result.currentBidPrice;
 		value = value.replace(/[^0-9.]/g, '');
 		if (currency === 'USD') {
-			console.log(value);
 			priceArray.push(parseFloat(value));
 
 			const listingDetail = {
 				id: result.itemId || '',
 				title: result.title || '',
 				url: result.itemWebUrl || result.link || '',
-				seller: result.seller?.username || '', // ✅ optional chaining
-				price: parseFloat(value), // fallback to 0 if value is missing,
+				seller: result.seller?.username || '',
+				price: parseFloat(parseFloat(value).toFixed(2)),
 				date: result.date || ''
 			};
 
 			listingsArray.push(listingDetail);
 		}
 	});
-	console.log('listing array');
-	console.log(listingsArray);
+
+	// sorts most recent first
+	listingsArray.sort((a, b) => {
+		if (a.date && b.date) {
+			const dateA = new Date(a.date);
+			const dateB = new Date(b.date);
+			return dateB - dateA;
+		}
+	});
+
+	// console.log('listing array');
+	// console.log(listingsArray);
 	if (priceArray.length === 0) {
 		updateResult(setNoResult, id);
 		return;
 	} else {
-		console.log(`price array ${priceArray}`);
+		// console.log(`price array ${priceArray}`);
 		stateListing(listingsArray);
 		return {
 			Average: calculateAverage(priceArray).toFixed(2),

@@ -9,8 +9,12 @@ export default function SearchForm({
 	setQueryTerm,
 	setAucStatsData,
 	setBinStatsData,
-	setSoldBinListings,
-	setSoldAucListings
+	setBinSoldListings,
+	setAucSoldListings,
+	setAucListings,
+	setBinListings,
+	setBinSoldStatsData,
+	setAucSoldStatsData
 }) {
 	const [formData, setFormData] = useState({
 		grade: '',
@@ -41,9 +45,11 @@ export default function SearchForm({
 		setAucStatsData('');
 		setBinStatsData('');
 		setAucListings('');
-		setBinListigs('');
-		setSoldBinListings('');
-		setSoldAucListings('');
+		setBinListings('');
+		setBinSoldListings('');
+		setAucSoldListings('');
+		setAucSoldStatsData('');
+		setBinSoldStatsData('');
 	};
 
 	const handleChange = (event) => {

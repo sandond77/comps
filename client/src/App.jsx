@@ -19,14 +19,18 @@ function App() {
 	const [queryTerm, setQueryTerm] = useState('');
 	const [noResult, setNoResult] = useState({
 		auc: true,
-		bin: true
+		bin: true,
+		soldBin: true,
+		soldAuc: true
 	});
 	const [aucStatsData, setAucStatsData] = useState('');
 	const [binStatsData, setBinStatsData] = useState('');
+	const [aucSoldStatsData, setAucSoldStatsData] = useState('');
+	const [binSoldStatsData, setBinSoldStatsData] = useState('');
 	const [aucListings, setAucListings] = useState('');
 	const [binListings, setBinListings] = useState('');
-	const [aucSoldListings, setSoldAucListings] = useState('');
-	const [binSoldListings, setSoldBinListings] = useState('');
+	const [aucSoldListings, setAucSoldListings] = useState('');
+	const [binSoldListings, setBinSoldListings] = useState('');
 	let theme = createTheme();
 	theme = responsiveFontSizes(theme);
 
@@ -43,15 +47,16 @@ function App() {
 				setNoResult,
 				setAucListings,
 				setBinListings,
-				setSoldBinListings,
-				setSoldAucListings
+				setBinSoldListings,
+				setAucSoldListings
 			)
 		);
+		console.log(statistics);
 	};
 
 	//need useeffect to listen to statistic/result state changes and refresh dom
 	useEffect(() => {
-		console.log(noResult.bin, noResult.auc);
+		// console.log(noResult.bin, noResult.auc);
 		if (noResult.bin === false) {
 			setBinStatsData({
 				Average: `$${statistics.bin.Average}`,
@@ -67,6 +72,24 @@ function App() {
 				Low: `$${statistics.auc.Lowest}`,
 				High: `$${statistics.auc.Highest}`,
 				'# of Data Points': statistics.auc['Data Points']
+			});
+		}
+
+		if (noResult.soldAuc === false) {
+			setAucSoldStatsData({
+				Average: `$${statistics.aucSold.Average}`,
+				Low: `$${statistics.aucSold.Lowest}`,
+				High: `$${statistics.aucSold.Highest}`,
+				'# of Data Points': statistics.aucSold['Data Points']
+			});
+		}
+
+		if (noResult.soldBin === false) {
+			setBinSoldStatsData({
+				Average: `$${statistics.binSold.Average}`,
+				Low: `$${statistics.binSold.Lowest}`,
+				High: `$${statistics.binSold.Highest}`,
+				'# of Data Points': statistics.binSold['Data Points']
 			});
 		}
 	}, [statistics, noResult]);
@@ -178,6 +201,73 @@ function App() {
 									))
 								)}
 								{!noResult.bin && <Modal listings={binListings} />}
+							</Grid>
+						</Grid>
+					</Box>
+				)}
+				{(!noResult.soldAuc || !noResult.soldBin) && searchStatus && (
+					<Box sx={{ border: '1px solid', margin: '2' }}>
+						<Grid container spacing={2}>
+							<Grid
+								size={{ xs: 12, md: 6 }}
+								sx={{ borderRight: '1px solid', margin: '2' }}
+							>
+								<Typography
+									variant="h4"
+									color="Success"
+									gutterBottom
+									sx={{ marginTop: 4 }}
+									theme={theme}
+								>
+									Sold Auction Data:
+								</Typography>
+								{noResult.soldAuc ? (
+									<Typography
+										variant="h5"
+										color="warning"
+										gutterBottom
+										sx={{ marginTop: 4 }}
+										theme={theme}
+									>
+										No Sold Auction Data Found
+									</Typography>
+								) : (
+									Object.entries(aucSoldStatsData).map(([key, value]) => (
+										<Typography key={key} variant="h5">
+											{key}: {value}
+										</Typography>
+									))
+								)}
+								{/* {!noResult.auc && <Modal listings={aucListings} />} */}
+							</Grid>
+							<Grid size={{ xs: 12, md: 6 }}>
+								<Typography
+									variant="h4"
+									color="Success"
+									gutterBottom
+									sx={{ marginTop: 4 }}
+									theme={theme}
+								>
+									Sold BIN Data:
+								</Typography>
+								{noResult.soldBin ? (
+									<Typography
+										variant="h5"
+										color="warning"
+										gutterBottom
+										sx={{ marginTop: 4 }}
+										theme={theme}
+									>
+										No Sold BIN Data Found
+									</Typography>
+								) : (
+									Object.entries(binSoldStatsData).map(([key, value]) => (
+										<Typography key={key} variant="h5">
+											{key}: {value}
+										</Typography>
+									))
+								)}
+								{/* {!noResult.bin && <Modal listings={binListings} />} */}
 							</Grid>
 						</Grid>
 					</Box>

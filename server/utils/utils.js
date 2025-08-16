@@ -109,7 +109,8 @@ async function scrape(page, url, maxPages) {
 								?.innerText ||
 							'';
 						let match = soldDate.match(/([A-Za-z]+ \d{1,2}, \d{4})/); // "Jul 15, 2025"
-						let date = match ? new Date(match[1]) : null;
+						let dateObj = match ? new Date(match[1]) : null;
+						const date = dateObj ? dateObj.toISOString().split('T')[0] : '';
 
 						const link = item.querySelector('.s-item__link')?.href || '';
 
