@@ -16,6 +16,7 @@ export default function ListingsTable({ listings }) {
 						<TableCell>#</TableCell>
 						<TableCell>Listing</TableCell>
 						<TableCell align="right">Price</TableCell>
+						{listings[0].date && <TableCell align="right">Sold Date</TableCell>}
 						<TableCell align="right">Seller</TableCell>
 					</TableRow>
 				</TableHead>
@@ -33,6 +34,9 @@ export default function ListingsTable({ listings }) {
 									</a>
 								</TableCell>
 								<TableCell align="right">${listing.price}</TableCell>
+								{listing.date && (
+									<TableCell align="right">{listing.date}</TableCell>
+								)}
 								<TableCell align="right">{listing.seller}</TableCell>
 							</TableRow>
 						))}
