@@ -83,7 +83,7 @@ export async function parseApiData(
 		soldAuc: noAucSoldResults
 	});
 
-	if (noBinResults && noAucResults && noAucSoldResults && noAucSoldResults)
+	if (noBinResults && noAucResults && noAucSoldResults && noBinSoldResults)
 		return; //ends function if empty
 
 	let resultBinArray = [];
@@ -243,7 +243,7 @@ async function parseResults(
 function updateResult(setNoResult, id) {
 	setNoResult((prev) => ({
 		...prev,
-		[id]: true
+		[id]: !prev[id]
 	}));
 	return;
 }

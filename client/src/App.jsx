@@ -158,7 +158,7 @@ function App() {
 					</Box>
 				)}
 
-				{(!noResult.auc || !noResult.bin) && searchStatus && (
+				{(noResult.auc || noResult.bin) && searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Grid container spacing={2}>
 							<Grid
@@ -174,7 +174,7 @@ function App() {
 								>
 									Active Auction Data:
 								</Typography>
-								{noResult.auc ? (
+								{aucListings.length === 0 ? (
 									<Typography
 										variant="h5"
 										color="warning"
@@ -203,7 +203,7 @@ function App() {
 								>
 									Active BIN Data:
 								</Typography>
-								{noResult.bin ? (
+								{binListings.length === 0 ? (
 									<Typography
 										variant="h5"
 										color="warning"
@@ -226,7 +226,7 @@ function App() {
 					</Box>
 				)}
 
-				{(!noResult.soldAuc || !noResult.soldBin) && searchStatus && (
+				{(noResult.soldAuc || noResult.soldBin) && searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Grid container spacing={2}>
 							<Grid
@@ -242,7 +242,7 @@ function App() {
 								>
 									Sold Auction Data:
 								</Typography>
-								{noResult.soldAuc ? (
+								{aucSoldListings.length === 0 ? (
 									<Typography
 										variant="h5"
 										color="warning"
@@ -271,7 +271,7 @@ function App() {
 								>
 									Sold BIN Data:
 								</Typography>
-								{noResult.soldBin ? (
+								{binSoldListings.length === 0 ? (
 									<Typography
 										variant="h5"
 										color="warning"
