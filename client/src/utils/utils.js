@@ -66,10 +66,15 @@ export async function parseApiData(
 	const noAucResults =
 		filteredAucResults === null || filteredAucResults === undefined;
 	const noBinSoldResults =
-		filteredSoldBinResults === null || filteredSoldBinResults === undefined;
+		filteredSoldBinResults === null ||
+		filteredSoldBinResults === undefined ||
+		filteredSoldBinResults.length === 0;
 	const noAucSoldResults =
-		filteredSoldAucResults === null || filteredSoldAucResults === undefined;
+		filteredSoldAucResults === null ||
+		filteredSoldAucResults === undefined ||
+		filteredSoldAucResults.length === 0;
 
+	console.log(noAucSoldResults, noBinSoldResults);
 	// update state immediately to render conditional "no results"
 	setNoResult({
 		bin: noBinResults,

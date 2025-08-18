@@ -36,7 +36,7 @@ export default function BasicModal({ listings }) {
 			>
 				<Box sx={style}>
 					<Typography id="modal-modal-title" variant="h6" component="h2">
-						Current Listings
+						Listings
 					</Typography>
 					{/* <ol>
 						{listings.map((listing) => (

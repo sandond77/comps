@@ -124,6 +124,10 @@ function App() {
 					setBinStatsData={setBinStatsData}
 					setAucListings={setAucListings}
 					setBinListings={setBinListings}
+					setBinSoldListings={setBinSoldListings}
+					setAucSoldListings={setAucSoldListings}
+					setBinSoldStatsData={setBinSoldStatsData}
+					setAucSoldStatsData={setAucSoldStatsData}
 				/>
 				{searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
@@ -221,6 +225,7 @@ function App() {
 						</Grid>
 					</Box>
 				)}
+
 				{(!noResult.soldAuc || !noResult.soldBin) && searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Grid container spacing={2}>
