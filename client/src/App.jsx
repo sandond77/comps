@@ -6,7 +6,8 @@ import {
 	Box,
 	createTheme,
 	responsiveFontSizes,
-	Grid
+	Grid,
+	CircularProgress
 } from '@mui/material';
 import SearchForm from './SearchForm';
 import { parseApiData } from './utils/utils';
@@ -17,12 +18,6 @@ function App() {
 	const [searchStatus, setSearchStatus] = useState(false);
 	const [statistics, setStatistics] = useState('');
 	const [queryTerm, setQueryTerm] = useState('');
-	const [hasResult, setHasResult] = useState({
-		auc: false,
-		bin: false,
-		soldBin: false,
-		soldAuc: false
-	});
 	const [aucStatsData, setAucStatsData] = useState('');
 	const [binStatsData, setBinStatsData] = useState('');
 	const [aucSoldStatsData, setAucSoldStatsData] = useState('');
@@ -32,17 +27,12 @@ function App() {
 	const [aucSoldListings, setAucSoldListings] = useState('');
 	const [binSoldListings, setBinSoldListings] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [hasResults, setHasResults] = useState(false);
 	let theme = createTheme();
 	theme = responsiveFontSizes(theme);
 
 	const handleSubmit = async (formData) => {
 		console.log('form submitted');
-		setHasResult({
-			auc: false,
-			bin: false,
-			soldBin: false,
-			soldAuc: false
-		});
 		setQueryTerm('');
 		setSearchStatus(false);
 		setAucStatsData('');
@@ -61,11 +51,12 @@ function App() {
 			await parseApiData(
 				parsedFormData,
 				formData,
-				setHasResult,
 				setAucListings,
 				setBinListings,
 				setAucSoldListings,
-				setBinSoldListings
+				setBinSoldListings,
+				setLoading,
+				setHasResults
 			)
 		);
 		console.log(statistics);
@@ -73,8 +64,9 @@ function App() {
 
 	//need useeffect to listen to statistic/result state changes and refresh dom
 	useEffect(() => {
-		// console.log(hasResult.bin, hasResult.auc);
-		if (hasResult.bin === true) {
+		if (!searchStatus) return;
+
+		if (searchStatus && hasResults) {
 			setBinStatsData({
 				Average: `$${statistics.bin.Average}`,
 				Low: `$${statistics.bin.Lowest}`,
@@ -82,8 +74,7 @@ function App() {
 				'# of Data Points': statistics.bin['Data Points']
 			});
 		}
-
-		if (hasResult.auc === true) {
+		if (searchStatus && hasResults) {
 			setAucStatsData({
 				Average: `$${statistics.auc.Average}`,
 				Low: `$${statistics.auc.Lowest}`,
@@ -92,7 +83,7 @@ function App() {
 			});
 		}
 
-		if (hasResult.soldAuc === true) {
+		if (searchStatus && hasResults) {
 			setAucSoldStatsData({
 				Average: `$${statistics.aucSold.Average}`,
 				Low: `$${statistics.aucSold.Lowest}`,
@@ -101,7 +92,7 @@ function App() {
 			});
 		}
 
-		if (hasResult.soldBin === true) {
+		if (searchStatus && hasResults) {
 			setBinSoldStatsData({
 				Average: `$${statistics.binSold.Average}`,
 				Low: `$${statistics.binSold.Lowest}`,
@@ -109,14 +100,7 @@ function App() {
 				'# of Data Points': statistics.binSold['Data Points']
 			});
 		}
-	}, [statistics, hasResult]);
-
-	const allEmpty =
-		hasResult.auc === false &&
-		hasResult.bin === false &&
-		hasResult.soldAuc === false &&
-		hasResult.soldBin === false &&
-		searchStatus;
+	}, [statistics, hasResults]);
 
 	return (
 		<>
@@ -152,7 +136,7 @@ function App() {
 						</Typography>
 					</Box>
 				)}
-				{hasResult.auc && hasResult.bin && searchStatus && (
+				{/* {allEmpty && searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Typography
 							variant="h4"
@@ -164,77 +148,79 @@ function App() {
 							No Results Found - Try Different Query
 						</Typography>
 					</Box>
-				)}
-
-				{allEmpty && (
-					<Box sx={{ border: '1px solid', margin: '2' }}>
-						<Grid container spacing={2}>
-							<Grid
-								size={{ xs: 12, md: 6 }}
-								sx={{ borderRight: '1px solid', margin: '2' }}
-							>
-								<Typography
-									variant="h4"
-									color="Success"
-									gutterBottom
-									sx={{ marginTop: 4 }}
-									theme={theme}
+				)} */}
+				{loading && searchStatus ? (
+					<CircularProgress />
+				) : (
+					searchStatus && (
+						<Box sx={{ border: '1px solid', margin: '2' }}>
+							<Grid container spacing={2}>
+								<Grid
+									size={{ xs: 12, md: 6 }}
+									sx={{ borderRight: '1px solid', margin: '2' }}
 								>
-									Active Auction Data:
-								</Typography>
-								{aucListings.length === 0 ? (
 									<Typography
-										variant="h5"
-										color="warning"
+										variant="h4"
+										color="Success"
 										gutterBottom
 										sx={{ marginTop: 4 }}
 										theme={theme}
 									>
-										No Active Auction Data Found
+										Active Auction Data:
 									</Typography>
-								) : (
-									Object.entries(aucStatsData).map(([key, value]) => (
-										<Typography key={key} variant="h5">
-											{key}: {value}
+									{aucListings.length === 0 ? (
+										<Typography
+											variant="h5"
+											color="warning"
+											gutterBottom
+											sx={{ marginTop: 4 }}
+											theme={theme}
+										>
+											No Active Auction Data Found
 										</Typography>
-									))
-								)}
-								{hasResult.auc && <Modal listings={aucListings} />}
-							</Grid>
-							<Grid size={{ xs: 12, md: 6 }}>
-								<Typography
-									variant="h4"
-									color="Success"
-									gutterBottom
-									sx={{ marginTop: 4 }}
-									theme={theme}
-								>
-									Active BIN Data:
-								</Typography>
-								{binListings.length === 0 ? (
+									) : (
+										Object.entries(aucStatsData).map(([key, value]) => (
+											<Typography key={key} variant="h5">
+												{key}: {value}
+											</Typography>
+										))
+									)}
+									{<Modal listings={aucListings} />}
+								</Grid>
+								<Grid size={{ xs: 12, md: 6 }}>
 									<Typography
-										variant="h5"
-										color="warning"
+										variant="h4"
+										color="Success"
 										gutterBottom
 										sx={{ marginTop: 4 }}
 										theme={theme}
 									>
-										No Active BIN Data Found
+										Active BIN Data:
 									</Typography>
-								) : (
-									Object.entries(binStatsData).map(([key, value]) => (
-										<Typography key={key} variant="h5">
-											{key}: {value}
+									{binListings.length === 0 ? (
+										<Typography
+											variant="h5"
+											color="warning"
+											gutterBottom
+											sx={{ marginTop: 4 }}
+											theme={theme}
+										>
+											No Active BIN Data Found
 										</Typography>
-									))
-								)}
-								{hasResult.bin && <Modal listings={binListings} />}
+									) : (
+										Object.entries(binStatsData).map(([key, value]) => (
+											<Typography key={key} variant="h5">
+												{key}: {value}
+											</Typography>
+										))
+									)}
+									{<Modal listings={binListings} />}
+								</Grid>
 							</Grid>
-						</Grid>
-					</Box>
+						</Box>
+					)
 				)}
-
-				{(hasResult.soldAuc || hasResult.soldBin) && searchStatus && (
+				{searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Grid container spacing={2}>
 							<Grid
@@ -267,7 +253,7 @@ function App() {
 										</Typography>
 									))
 								)}
-								{hasResult.soldAuc && <Modal listings={aucSoldListings} />}
+								{<Modal listings={aucSoldListings} />}
 							</Grid>
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Typography
@@ -296,7 +282,7 @@ function App() {
 										</Typography>
 									))
 								)}
-								{hasResult.soldBin && <Modal listings={binSoldListings} />}
+								{<Modal listings={binSoldListings} />}
 							</Grid>
 						</Grid>
 					</Box>
