@@ -20,7 +20,7 @@ const style = {
 	overflowX: 'auto'
 };
 
-export default function BasicModal({ listings }) {
+export default function ListingsModal({ listings }) {
 	const [open, setOpen] = React.useState(false);
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);

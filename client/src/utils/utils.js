@@ -46,7 +46,6 @@ export async function parseApiData(
 	setBinListings,
 	setSoldAucListings,
 	setSoldBinListings,
-	setLoading,
 	setHasResults
 ) {
 	const queryParams = new URLSearchParams({ q: parsedFormData }).toString(); //using a const declared value instead of state value due to delays in state update
@@ -56,7 +55,6 @@ export async function parseApiData(
 	const filteredAucResults = unfilteredResults.ebaySearch.data.auction;
 	const filteredSoldBinResults = unfilteredResults.ebayScrape.data.binSold;
 	const filteredSoldAucResults = unfilteredResults.ebayScrape.data.aucSold;
-	setLoading(true);
 	console.log('look here ----- ');
 	console.log(unfilteredResults.ebayScrape);
 	console.log(unfilteredResults.ebaySearch);
@@ -77,7 +75,6 @@ export async function parseApiData(
 		formData,
 		'bin',
 		setBinListings,
-		setLoading,
 		setHasResults
 	);
 
@@ -87,7 +84,6 @@ export async function parseApiData(
 		formData,
 		'auc',
 		setAucListings,
-		setLoading,
 		setHasResults
 	);
 
@@ -97,7 +93,6 @@ export async function parseApiData(
 		formData,
 		'soldBin',
 		setSoldBinListings,
-		setLoading,
 		setHasResults
 	);
 
@@ -107,53 +102,8 @@ export async function parseApiData(
 		formData,
 		'soldAuc',
 		setSoldAucListings,
-		setLoading,
 		setHasResults
 	);
-
-	// let binStats = noBinResults
-	// 	? null
-	// 	: await parseResults(
-	// 			filteredBinResults,
-	// 			resultBinArray,
-	// 			formData,
-	// 			setHasResult,
-	// 			'bin',
-	// 			setBinListings
-	// 	  );
-
-	// let aucStats = noAucResults
-	// 	? null
-	// 	: await parseResults(
-	// 			filteredAucResults,
-	// 			resultAucArray,
-	// 			formData,
-	// 			setHasResult,
-	// 			'auc',
-	// 			setAucListings
-	// 	  );
-
-	// let binSoldStats = noBinSoldResults
-	// 	? null
-	// 	: await parseResults(
-	// 			filteredSoldBinResults,
-	// 			resultSoldBinArray,
-	// 			formData,
-	// 			setHasResult,
-	// 			'soldBin',
-	// 			setSoldBinListings
-	// 	  );
-
-	// let aucSoldStats = noAucSoldResults
-	// 	? null
-	// 	: await parseResults(
-	// 			filteredSoldAucResults,
-	// 			resultSoldAucArray,
-	// 			formData,
-	// 			setHasResult,
-	// 			'soldAuc',
-	// 			setSoldAucListings
-	// 	  );
 
 	console.log('look here 2');
 	console.log(binSoldStats);
@@ -174,7 +124,6 @@ async function parseResults(
 	formData,
 	id,
 	stateListing,
-	setLoading,
 	setHasResults
 ) {
 	arr1.forEach((result) => {
@@ -249,7 +198,6 @@ async function parseResults(
 	// 	stateListing(listingsArray);
 	// }
 	stateListing(listingsArray);
-	setLoading(false);
 	setHasResults(true);
 
 	return {

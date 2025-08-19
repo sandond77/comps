@@ -6,13 +6,12 @@ import {
 	Box,
 	createTheme,
 	responsiveFontSizes,
-	Grid,
-	CircularProgress
+	Grid
 } from '@mui/material';
 import SearchForm from './SearchForm';
+import Results from './Results';
 import { parseApiData } from './utils/utils';
 import { useEffect } from 'react';
-import Modal from './Modal';
 
 function App() {
 	const [searchStatus, setSearchStatus] = useState(false);
@@ -47,18 +46,22 @@ function App() {
 		const parsedFormData = formValues.filter(Boolean).join(' '); //removes any blank spaces from array and joins elements with a space
 		setQueryTerm(parsedFormData);
 		setSearchStatus(true);
-		setStatistics(
-			await parseApiData(
-				parsedFormData,
-				formData,
-				setAucListings,
-				setBinListings,
-				setAucSoldListings,
-				setBinSoldListings,
-				setLoading,
-				setHasResults
-			)
-		);
+		try {
+			setLoading(true);
+			setStatistics(
+				await parseApiData(
+					parsedFormData,
+					formData,
+					setAucListings,
+					setBinListings,
+					setAucSoldListings,
+					setBinSoldListings,
+					setHasResults
+				)
+			);
+		} finally {
+			setLoading(false);
+		}
 		console.log(statistics);
 	};
 
@@ -120,169 +123,68 @@ function App() {
 					setAucSoldListings={setAucSoldListings}
 					setBinSoldStatsData={setBinSoldStatsData}
 					setAucSoldStatsData={setAucSoldStatsData}
+					setHasResults={setHasResults}
 				/>
 				{searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Typography
 							variant="h4"
 							gutterBottom
-							sx={{ marginTop: 4 }}
+							sx={{ mt: 2, ml: 2 }}
 							theme={theme}
 						>
 							Optimal Query String:
 						</Typography>
-						<Typography variant="h5" color="primary" gutterBottom theme={theme}>
+						<Typography
+							variant="h5"
+							color="primary"
+							gutterBottom
+							theme={theme}
+							sx={{ textAlign: 'left', ml: 2 }}
+						>
 							{queryTerm}
 						</Typography>
 					</Box>
 				)}
-				{/* {allEmpty && searchStatus && (
-					<Box sx={{ border: '1px solid', margin: '2' }}>
-						<Typography
-							variant="h4"
-							color="warning"
-							gutterBottom
-							sx={{ marginTop: 4 }}
-							theme={theme}
-						>
-							No Results Found - Try Different Query
-						</Typography>
-					</Box>
-				)} */}
-				{loading && searchStatus ? (
-					<CircularProgress />
-				) : (
-					searchStatus && (
-						<Box sx={{ border: '1px solid', margin: '2' }}>
-							<Grid container spacing={2}>
-								<Grid
-									size={{ xs: 12, md: 6 }}
-									sx={{ borderRight: '1px solid', margin: '2' }}
-								>
-									<Typography
-										variant="h4"
-										color="Success"
-										gutterBottom
-										sx={{ marginTop: 4 }}
-										theme={theme}
-									>
-										Active Auction Data:
-									</Typography>
-									{aucListings.length === 0 ? (
-										<Typography
-											variant="h5"
-											color="warning"
-											gutterBottom
-											sx={{ marginTop: 4 }}
-											theme={theme}
-										>
-											No Active Auction Data Found
-										</Typography>
-									) : (
-										Object.entries(aucStatsData).map(([key, value]) => (
-											<Typography key={key} variant="h5">
-												{key}: {value}
-											</Typography>
-										))
-									)}
-									{<Modal listings={aucListings} />}
-								</Grid>
-								<Grid size={{ xs: 12, md: 6 }}>
-									<Typography
-										variant="h4"
-										color="Success"
-										gutterBottom
-										sx={{ marginTop: 4 }}
-										theme={theme}
-									>
-										Active BIN Data:
-									</Typography>
-									{binListings.length === 0 ? (
-										<Typography
-											variant="h5"
-											color="warning"
-											gutterBottom
-											sx={{ marginTop: 4 }}
-											theme={theme}
-										>
-											No Active BIN Data Found
-										</Typography>
-									) : (
-										Object.entries(binStatsData).map(([key, value]) => (
-											<Typography key={key} variant="h5">
-												{key}: {value}
-											</Typography>
-										))
-									)}
-									{<Modal listings={binListings} />}
-								</Grid>
-							</Grid>
-						</Box>
-					)
-				)}
+
 				{searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
-						<Grid container spacing={2}>
-							<Grid
-								size={{ xs: 12, md: 6 }}
-								sx={{ borderRight: '1px solid', margin: '2' }}
-							>
-								<Typography
-									variant="h4"
-									color="Success"
-									gutterBottom
-									sx={{ marginTop: 4 }}
-									theme={theme}
-								>
-									Sold Auction Data:
-								</Typography>
-								{aucSoldListings.length === 0 ? (
-									<Typography
-										variant="h5"
-										color="warning"
-										gutterBottom
-										sx={{ marginTop: 4 }}
-										theme={theme}
-									>
-										No Sold Auction Data Found
-									</Typography>
-								) : (
-									Object.entries(aucSoldStatsData).map(([key, value]) => (
-										<Typography key={key} variant="h5">
-											{key}: {value}
-										</Typography>
-									))
-								)}
-								{<Modal listings={aucSoldListings} />}
+						<Grid container spacing={2} sx={{ textAlign: 'left', ml: 2 }}>
+							<Grid size={{ xs: 12, md: 6 }}>
+								<Results
+									boxLabel1={'Active Auction Data'}
+									boxLabel2={'Active Auction Listings'}
+									listingsArray={aucListings}
+									statsObject={aucStatsData}
+									loading={loading}
+								/>
 							</Grid>
 							<Grid size={{ xs: 12, md: 6 }}>
-								<Typography
-									variant="h4"
-									color="Success"
-									gutterBottom
-									sx={{ marginTop: 4 }}
-									theme={theme}
-								>
-									Sold BIN Data:
-								</Typography>
-								{binSoldListings.length === 0 ? (
-									<Typography
-										variant="h5"
-										color="warning"
-										gutterBottom
-										sx={{ marginTop: 4 }}
-										theme={theme}
-									>
-										No Sold BIN Data Found
-									</Typography>
-								) : (
-									Object.entries(binSoldStatsData).map(([key, value]) => (
-										<Typography key={key} variant="h5">
-											{key}: {value}
-										</Typography>
-									))
-								)}
-								{<Modal listings={binSoldListings} />}
+								<Results
+									boxLabel1={'Active BIN Data'}
+									boxLabel2={'Active BIN Listings'}
+									listingsArray={binListings}
+									statsObject={binStatsData}
+									loading={loading}
+								/>
+							</Grid>
+							<Grid size={{ xs: 12, md: 6 }}>
+								<Results
+									boxLabel1={'Sold Auction Data'}
+									boxLabel2={'Sold Auction Listings'}
+									listingsArray={aucSoldListings}
+									statsObject={aucSoldStatsData}
+									loading={loading}
+								/>
+							</Grid>
+							<Grid size={{ xs: 12, md: 6 }}>
+								<Results
+									boxLabel1={'Sold BIN Data'}
+									boxLabel2={'Sold BIN Listings'}
+									listingsArray={binSoldListings}
+									statsObject={binSoldStatsData}
+									loading={loading}
+								/>
 							</Grid>
 						</Grid>
 					</Box>
