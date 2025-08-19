@@ -59,51 +59,64 @@ export async function parseApiData(
 	console.log(unfilteredResults.ebayScrape);
 	console.log(unfilteredResults.ebaySearch);
 
-	// console.log(noAucSoldResults, noBinSoldResults);
+	const noBinResults = filteredBinResults.length === 0;
+	const noAucResults = filteredAucResults.length === 0;
+	const noBinSoldResults = filteredSoldBinResults.length === 0;
+	const noAucSoldResults = filteredSoldAucResults.length === 0;
 
-	// if (noBinResults && noAucResults && noAucSoldResults && noBinSoldResults)
-	// 	return; //ends function if empty
+	// If everything is empty, stop early
+	if (noBinResults && noAucResults && noBinSoldResults && noAucSoldResults) {
+		return;
+	}
 
 	let resultBinArray = [];
 	let resultAucArray = [];
 	let resultSoldBinArray = [];
 	let resultSoldAucArray = [];
 
-	let binStats = await parseResults(
-		filteredBinResults,
-		resultBinArray,
-		formData,
-		'bin',
-		setBinListings,
-		setHasResults
-	);
+	let binStats =
+		filteredBinResults.length > 0 &&
+		(await parseResults(
+			filteredBinResults,
+			resultBinArray,
+			formData,
+			'bin',
+			setBinListings,
+			setHasResults
+		));
 
-	let aucStats = await parseResults(
-		filteredAucResults,
-		resultAucArray,
-		formData,
-		'auc',
-		setAucListings,
-		setHasResults
-	);
+	let aucStats =
+		filteredAucResults.length > 0 &&
+		(await parseResults(
+			filteredAucResults,
+			resultAucArray,
+			formData,
+			'auc',
+			setAucListings,
+			setHasResults
+		));
 
-	let binSoldStats = await parseResults(
-		filteredSoldBinResults,
-		resultSoldBinArray,
-		formData,
-		'soldBin',
-		setSoldBinListings,
-		setHasResults
-	);
+	let binSoldStats =
+		filteredSoldBinResults.length > 0 &&
+		(await parseResults(
+			filteredSoldBinResults,
+			resultSoldBinArray,
+			formData,
+			'soldBin',
+			setSoldBinListings,
+			setHasResults
+		));
 
-	let aucSoldStats = await parseResults(
-		filteredSoldAucResults,
-		resultSoldAucArray,
-		formData,
-		'soldAuc',
-		setSoldAucListings,
-		setHasResults
-	);
+	let aucSoldStats =
+		filteredSoldAucResults.length > 0 &&
+		(await parseResults(
+			filteredSoldAucResults,
+			resultSoldAucArray,
+			formData,
+			'soldAuc',
+			setSoldAucListings,
+			setHasResults
+		));
 
 	console.log('look here 2');
 	console.log(binSoldStats);

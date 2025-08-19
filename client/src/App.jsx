@@ -153,7 +153,6 @@ function App() {
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Results
 									boxLabel1={'Active Auction Data'}
-									boxLabel2={'Active Auction Listings'}
 									listingsArray={aucListings}
 									statsObject={aucStatsData}
 									loading={loading}
@@ -162,7 +161,6 @@ function App() {
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Results
 									boxLabel1={'Active BIN Data'}
-									boxLabel2={'Active BIN Listings'}
 									listingsArray={binListings}
 									statsObject={binStatsData}
 									loading={loading}
@@ -171,7 +169,6 @@ function App() {
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Results
 									boxLabel1={'Sold Auction Data'}
-									boxLabel2={'Sold Auction Listings'}
 									listingsArray={aucSoldListings}
 									statsObject={aucSoldStatsData}
 									loading={loading}
@@ -180,7 +177,6 @@ function App() {
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Results
 									boxLabel1={'Sold BIN Data'}
-									boxLabel2={'Sold BIN Listings'}
 									listingsArray={binSoldListings}
 									statsObject={binSoldStatsData}
 									loading={loading}
