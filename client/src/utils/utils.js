@@ -42,7 +42,7 @@ export function calculateAverage(arr) {
 export async function parseApiData(
 	parsedFormData,
 	formData,
-	setNoResult,
+	setHasResult,
 	setAucListings,
 	setBinListings,
 	setSoldAucListings,
@@ -61,6 +61,7 @@ export async function parseApiData(
 	console.log(unfilteredResults.ebaySearch);
 
 	// Want to check initial query for results; queryEbay should return an non-empty object if theres results
+	// true means empty
 	const noBinResults =
 		filteredBinResults === null || filteredBinResults === undefined;
 	const noAucResults =
@@ -76,11 +77,11 @@ export async function parseApiData(
 
 	console.log(noAucSoldResults, noBinSoldResults);
 	// update state immediately to render conditional "no results"
-	setNoResult({
-		bin: noBinResults,
-		auc: noAucResults,
-		soldBin: noBinSoldResults,
-		soldAuc: noAucSoldResults
+	setHasResult({
+		bin: !noBinResults,
+		auc: !noAucResults,
+		soldBin: !noBinSoldResults,
+		soldAuc: !noAucSoldResults
 	});
 
 	if (noBinResults && noAucResults && noAucSoldResults && noBinSoldResults)
@@ -97,7 +98,7 @@ export async function parseApiData(
 				filteredBinResults,
 				resultBinArray,
 				formData,
-				setNoResult,
+				setHasResult,
 				'bin',
 				setBinListings
 		  );
@@ -108,7 +109,7 @@ export async function parseApiData(
 				filteredAucResults,
 				resultAucArray,
 				formData,
-				setNoResult,
+				setHasResult,
 				'auc',
 				setAucListings
 		  );
@@ -119,7 +120,7 @@ export async function parseApiData(
 				filteredSoldBinResults,
 				resultSoldBinArray,
 				formData,
-				setNoResult,
+				setHasResult,
 				'soldBin',
 				setSoldBinListings
 		  );
@@ -130,7 +131,7 @@ export async function parseApiData(
 				filteredSoldAucResults,
 				resultSoldAucArray,
 				formData,
-				setNoResult,
+				setHasResult,
 				'soldAuc',
 				setSoldAucListings
 		  );
@@ -152,7 +153,7 @@ async function parseResults(
 	arr1,
 	arr2,
 	formData,
-	setNoResult,
+	setHasResult,
 	id,
 	stateListing
 ) {
@@ -187,7 +188,7 @@ async function parseResults(
 	console.log(id, arr2);
 
 	if (arr2.length === 0) {
-		updateResult(setNoResult, id);
+		updateResult(setHasResult, id);
 		return;
 	}
 
@@ -225,23 +226,24 @@ async function parseResults(
 
 	// console.log('listing array');
 	// console.log(listingsArray);
-	if (priceArray.length === 0) {
-		updateResult(setNoResult, id);
-		return;
-	} else {
-		// console.log(`price array ${priceArray}`);
-		stateListing(listingsArray);
-		return {
-			Average: calculateAverage(priceArray).toFixed(2),
-			Lowest: Math.min(...priceArray).toFixed(2),
-			Highest: Math.max(...priceArray).toFixed(2),
-			'Data Points': priceArray.length
-		};
-	}
+	// if (priceArray.length === 0) {
+	// 	updateResult(setHasResult, id);
+	// 	return;
+	// } else {
+	// 	// console.log(`price array ${priceArray}`);
+	// 	stateListing(listingsArray);
+	// }
+	stateListing(listingsArray);
+	return {
+		Average: calculateAverage(priceArray).toFixed(2),
+		Lowest: Math.min(...priceArray).toFixed(2),
+		Highest: Math.max(...priceArray).toFixed(2),
+		'Data Points': priceArray.length
+	};
 }
 
-function updateResult(setNoResult, id) {
-	setNoResult((prev) => ({
+function updateResult(setHasResult, id) {
+	setHasResult((prev) => ({
 		...prev,
 		[id]: !prev[id]
 	}));

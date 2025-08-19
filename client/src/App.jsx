@@ -17,11 +17,11 @@ function App() {
 	const [searchStatus, setSearchStatus] = useState(false);
 	const [statistics, setStatistics] = useState('');
 	const [queryTerm, setQueryTerm] = useState('');
-	const [noResult, setNoResult] = useState({
-		auc: true,
-		bin: true,
-		soldBin: true,
-		soldAuc: true
+	const [hasResult, setHasResult] = useState({
+		auc: false,
+		bin: false,
+		soldBin: false,
+		soldAuc: false
 	});
 	const [aucStatsData, setAucStatsData] = useState('');
 	const [binStatsData, setBinStatsData] = useState('');
@@ -31,16 +31,17 @@ function App() {
 	const [binListings, setBinListings] = useState('');
 	const [aucSoldListings, setAucSoldListings] = useState('');
 	const [binSoldListings, setBinSoldListings] = useState('');
+	const [loading, setLoading] = useState(false);
 	let theme = createTheme();
 	theme = responsiveFontSizes(theme);
 
 	const handleSubmit = async (formData) => {
 		console.log('form submitted');
-		setNoResult({
-			auc: true,
-			bin: true,
-			soldBin: true,
-			soldAuc: true
+		setHasResult({
+			auc: false,
+			bin: false,
+			soldBin: false,
+			soldAuc: false
 		});
 		setQueryTerm('');
 		setSearchStatus(false);
@@ -60,7 +61,7 @@ function App() {
 			await parseApiData(
 				parsedFormData,
 				formData,
-				setNoResult,
+				setHasResult,
 				setAucListings,
 				setBinListings,
 				setAucSoldListings,
@@ -72,8 +73,8 @@ function App() {
 
 	//need useeffect to listen to statistic/result state changes and refresh dom
 	useEffect(() => {
-		// console.log(noResult.bin, noResult.auc);
-		if (noResult.bin === false) {
+		// console.log(hasResult.bin, hasResult.auc);
+		if (hasResult.bin === true) {
 			setBinStatsData({
 				Average: `$${statistics.bin.Average}`,
 				Low: `$${statistics.bin.Lowest}`,
@@ -82,7 +83,7 @@ function App() {
 			});
 		}
 
-		if (noResult.auc === false) {
+		if (hasResult.auc === true) {
 			setAucStatsData({
 				Average: `$${statistics.auc.Average}`,
 				Low: `$${statistics.auc.Lowest}`,
@@ -91,7 +92,7 @@ function App() {
 			});
 		}
 
-		if (noResult.soldAuc === false) {
+		if (hasResult.soldAuc === true) {
 			setAucSoldStatsData({
 				Average: `$${statistics.aucSold.Average}`,
 				Low: `$${statistics.aucSold.Lowest}`,
@@ -100,7 +101,7 @@ function App() {
 			});
 		}
 
-		if (noResult.soldBin === false) {
+		if (hasResult.soldBin === true) {
 			setBinSoldStatsData({
 				Average: `$${statistics.binSold.Average}`,
 				Low: `$${statistics.binSold.Lowest}`,
@@ -108,7 +109,14 @@ function App() {
 				'# of Data Points': statistics.binSold['Data Points']
 			});
 		}
-	}, [statistics, noResult]);
+	}, [statistics, hasResult]);
+
+	const allEmpty =
+		hasResult.auc === false &&
+		hasResult.bin === false &&
+		hasResult.soldAuc === false &&
+		hasResult.soldBin === false &&
+		searchStatus;
 
 	return (
 		<>
@@ -144,7 +152,7 @@ function App() {
 						</Typography>
 					</Box>
 				)}
-				{noResult.auc && noResult.bin && searchStatus && (
+				{hasResult.auc && hasResult.bin && searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Typography
 							variant="h4"
@@ -158,7 +166,7 @@ function App() {
 					</Box>
 				)}
 
-				{(noResult.auc || noResult.bin) && searchStatus && (
+				{allEmpty && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Grid container spacing={2}>
 							<Grid
@@ -191,7 +199,7 @@ function App() {
 										</Typography>
 									))
 								)}
-								{!noResult.auc && <Modal listings={aucListings} />}
+								{hasResult.auc && <Modal listings={aucListings} />}
 							</Grid>
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Typography
@@ -220,13 +228,13 @@ function App() {
 										</Typography>
 									))
 								)}
-								{!noResult.bin && <Modal listings={binListings} />}
+								{hasResult.bin && <Modal listings={binListings} />}
 							</Grid>
 						</Grid>
 					</Box>
 				)}
 
-				{(noResult.soldAuc || noResult.soldBin) && searchStatus && (
+				{(hasResult.soldAuc || hasResult.soldBin) && searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
 						<Grid container spacing={2}>
 							<Grid
@@ -259,7 +267,7 @@ function App() {
 										</Typography>
 									))
 								)}
-								{!noResult.soldAuc && <Modal listings={aucSoldListings} />}
+								{hasResult.soldAuc && <Modal listings={aucSoldListings} />}
 							</Grid>
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Typography
@@ -288,7 +296,7 @@ function App() {
 										</Typography>
 									))
 								)}
-								{!noResult.soldBin && <Modal listings={binSoldListings} />}
+								{hasResult.soldBin && <Modal listings={binSoldListings} />}
 							</Grid>
 						</Grid>
 					</Box>
