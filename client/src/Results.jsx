@@ -33,9 +33,8 @@ export default function Results({
 		return { average: (total / valid.length).toFixed(2), count: valid.length }; // average based on however many valid items we got
 	}
 
-	function hasDates(arr) {}
-
 	let recentSalesAverage = averageRecentNFromArray(listingsArray);
+
 	return (
 		<>
 			<Typography
@@ -48,7 +47,7 @@ export default function Results({
 			</Typography>
 			<>
 				{loading ? (
-					<Box justifyContent={'center'} alignItems={'center'}>
+					<Box>
 						<CircularProgress />
 					</Box>
 				) : listingsArray.length === 0 ? (

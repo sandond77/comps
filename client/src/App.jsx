@@ -84,7 +84,7 @@ function App() {
 				Average: `$${statistics.bin.Average}`,
 				Low: `$${statistics.bin.Lowest}`,
 				High: `$${statistics.bin.Highest}`,
-				'# of Data Points': statistics.bin['Data Points']
+				'# of Listings': statistics.bin['Data Points']
 			});
 		}
 		if (searchStatus && hasResults.auc) {
@@ -92,7 +92,7 @@ function App() {
 				Average: `$${statistics.auc.Average}`,
 				Low: `$${statistics.auc.Lowest}`,
 				High: `$${statistics.auc.Highest}`,
-				'# of Data Points': statistics.auc['Data Points']
+				'# of Listings': statistics.auc['Data Points']
 			});
 		}
 
@@ -101,7 +101,7 @@ function App() {
 				Average: `$${statistics.aucSold.Average}`,
 				Low: `$${statistics.aucSold.Lowest}`,
 				High: `$${statistics.aucSold.Highest}`,
-				'# of Data Points': statistics.aucSold['Data Points']
+				'# of Listings': statistics.aucSold['Data Points']
 			});
 		}
 
@@ -110,7 +110,7 @@ function App() {
 				Average: `$${statistics.binSold.Average}`,
 				Low: `$${statistics.binSold.Lowest}`,
 				High: `$${statistics.binSold.Highest}`,
-				'# of Data Points': statistics.binSold['Data Points']
+				'# of Listings': statistics.binSold['Data Points']
 			});
 		}
 	}, [statistics, hasResults]);
