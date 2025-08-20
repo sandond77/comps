@@ -51,76 +51,59 @@ export async function parseApiData(
 	const queryParams = new URLSearchParams({ q: parsedFormData }).toString(); //using a const declared value instead of state value due to delays in state update
 
 	const unfilteredResults = await queryEbay(queryParams);
-	const filteredBinResults = unfilteredResults.ebaySearch.data.bin;
-	const filteredAucResults = unfilteredResults.ebaySearch.data.auction;
-	const filteredSoldBinResults = unfilteredResults.ebayScrape.data.binSold;
-	const filteredSoldAucResults = unfilteredResults.ebayScrape.data.aucSold;
+	const filteredBinResults = unfilteredResults?.ebaySearch?.data?.bin ?? [];
+	const filteredAucResults = unfilteredResults?.ebaySearch?.data?.auction ?? [];
+	const filteredSoldBinResults =
+		unfilteredResults?.ebayScrape?.data?.binSold ?? [];
+	const filteredSoldAucResults =
+		unfilteredResults?.ebayScrape?.data?.aucSold ?? [];
 	console.log('look here ----- ');
-	console.log(unfilteredResults.ebayScrape);
 	console.log(unfilteredResults.ebaySearch);
+	console.log(unfilteredResults.ebayScrape);
 
-	const noBinResults = filteredBinResults.length === 0;
-	const noAucResults = filteredAucResults.length === 0;
-	const noBinSoldResults = filteredSoldBinResults.length === 0;
-	const noAucSoldResults = filteredSoldAucResults.length === 0;
+	//check for results
+	setHasResults({
+		bin: filteredBinResults.length > 0,
+		auc: filteredAucResults.length > 0,
+		soldBin: filteredSoldBinResults.length > 0,
+		soldAuc: filteredSoldAucResults.length > 0
+	});
 
 	// If everything is empty, stop early
-	if (noBinResults && noAucResults && noBinSoldResults && noAucSoldResults) {
-		return;
-	}
+	let checkAllEmpty =
+		filteredBinResults.length === 0 &&
+		filteredAucResults.length === 0 &&
+		filteredSoldBinResults.length === 0 &&
+		filteredSoldAucResults.length === 0;
 
-	let resultBinArray = [];
-	let resultAucArray = [];
-	let resultSoldBinArray = [];
-	let resultSoldAucArray = [];
+	if (checkAllEmpty) return;
 
-	let binStats =
-		filteredBinResults.length > 0 &&
-		(await parseResults(
-			filteredBinResults,
-			resultBinArray,
+	const maybeParse = async (arr, type, setListings) => {
+		if (arr.length === 0) return undefined;
+		const out = [];
+		return await parseResults(
+			arr,
+			out,
 			formData,
-			'bin',
-			setBinListings,
+			type,
+			setListings,
 			setHasResults
-		));
+		);
+	};
 
-	let aucStats =
-		filteredAucResults.length > 0 &&
-		(await parseResults(
-			filteredAucResults,
-			resultAucArray,
-			formData,
-			'auc',
-			setAucListings,
-			setHasResults
-		));
+	const binStats = await maybeParse(filteredBinResults, 'bin', setBinListings);
+	const aucStats = await maybeParse(filteredAucResults, 'auc', setAucListings);
+	const binSoldStats = await maybeParse(
+		filteredSoldBinResults,
+		'soldBin',
+		setSoldBinListings
+	);
+	const aucSoldStats = await maybeParse(
+		filteredSoldAucResults,
+		'soldAuc',
+		setSoldAucListings
+	);
 
-	let binSoldStats =
-		filteredSoldBinResults.length > 0 &&
-		(await parseResults(
-			filteredSoldBinResults,
-			resultSoldBinArray,
-			formData,
-			'soldBin',
-			setSoldBinListings,
-			setHasResults
-		));
-
-	let aucSoldStats =
-		filteredSoldAucResults.length > 0 &&
-		(await parseResults(
-			filteredSoldAucResults,
-			resultSoldAucArray,
-			formData,
-			'soldAuc',
-			setSoldAucListings,
-			setHasResults
-		));
-
-	console.log('look here 2');
-	console.log(binSoldStats);
-	console.log(aucSoldStats);
 	console.log('done');
 
 	return {
@@ -131,14 +114,7 @@ export async function parseApiData(
 	};
 }
 
-async function parseResults(
-	arr1,
-	arr2,
-	formData,
-	id,
-	stateListing,
-	setHasResults
-) {
+async function parseResults(arr1, arr2, formData, id, stateListing) {
 	arr1.forEach((result) => {
 		let title = result.title.toLowerCase();
 		title = title.replace(/\s/g, ''); //Removes potential whitespace so query will return PSA10 or PSA 10
@@ -201,17 +177,7 @@ async function parseResults(
 		}
 	});
 
-	// console.log('listing array');
-	// console.log(listingsArray);
-	// if (priceArray.length === 0) {
-	// 	updateResult(setHasResult, id);
-	// 	return;
-	// } else {
-	// 	// console.log(`price array ${priceArray}`);
-	// 	stateListing(listingsArray);
-	// }
 	stateListing(listingsArray);
-	setHasResults(true);
 
 	return {
 		Average: calculateAverage(priceArray).toFixed(2),

@@ -26,7 +26,12 @@ function App() {
 	const [aucSoldListings, setAucSoldListings] = useState('');
 	const [binSoldListings, setBinSoldListings] = useState('');
 	const [loading, setLoading] = useState(false);
-	const [hasResults, setHasResults] = useState(false);
+	const [hasResults, setHasResults] = useState({
+		bin: false,
+		auc: false,
+		soldBin: false,
+		soldAuc: false
+	});
 	let theme = createTheme();
 	theme = responsiveFontSizes(theme);
 
@@ -69,7 +74,7 @@ function App() {
 	useEffect(() => {
 		if (!searchStatus) return;
 
-		if (searchStatus && hasResults) {
+		if (searchStatus && hasResults.bin) {
 			setBinStatsData({
 				Average: `$${statistics.bin.Average}`,
 				Low: `$${statistics.bin.Lowest}`,
@@ -77,7 +82,7 @@ function App() {
 				'# of Data Points': statistics.bin['Data Points']
 			});
 		}
-		if (searchStatus && hasResults) {
+		if (searchStatus && hasResults.auc) {
 			setAucStatsData({
 				Average: `$${statistics.auc.Average}`,
 				Low: `$${statistics.auc.Lowest}`,
@@ -86,7 +91,7 @@ function App() {
 			});
 		}
 
-		if (searchStatus && hasResults) {
+		if (searchStatus && hasResults.soldAuc) {
 			setAucSoldStatsData({
 				Average: `$${statistics.aucSold.Average}`,
 				Low: `$${statistics.aucSold.Lowest}`,
@@ -95,7 +100,7 @@ function App() {
 			});
 		}
 
-		if (searchStatus && hasResults) {
+		if (searchStatus && hasResults.soldBin) {
 			setBinSoldStatsData({
 				Average: `$${statistics.binSold.Average}`,
 				Low: `$${statistics.binSold.Lowest}`,

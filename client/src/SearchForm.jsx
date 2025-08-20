@@ -51,7 +51,12 @@ export default function SearchForm({
 		setAucSoldListings('');
 		setAucSoldStatsData('');
 		setBinSoldStatsData('');
-		setHasResults(false);
+		setHasResults({
+			bin: false,
+			auc: false,
+			soldBin: false,
+			soldAuc: false
+		});
 	};
 
 	const handleChange = (event) => {
