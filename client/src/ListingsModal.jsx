@@ -38,16 +38,6 @@ export default function ListingsModal({ listings }) {
 					<Typography id="modal-modal-title" variant="h6" component="h2">
 						Listings
 					</Typography>
-					{/* <ol>
-						{listings.map((listing) => (
-							<li key={listing.id}>
-								<a href={listing.url} target="_blank">
-									{listing.title}
-								</a>
-								- ${listing.price} by {listing.seller}
-							</li>
-						))}
-					</ol> */}
 					<ListingsTable listings={listings} />
 				</Box>
 			</Modal>

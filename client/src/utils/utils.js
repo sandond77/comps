@@ -168,7 +168,7 @@ async function parseResults(arr1, arr2, formData, id, stateListing) {
 		}
 	});
 
-	// sorts most recent first
+	// sorts most recent first if there is a date; mainly for sold listings
 	listingsArray.sort((a, b) => {
 		if (a.date && b.date) {
 			const dateA = new Date(a.date);
