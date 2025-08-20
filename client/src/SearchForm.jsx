@@ -5,17 +5,8 @@ import React, { useState } from 'react';
 
 export default function SearchForm({
 	handleSubmit,
-	setSearchStatus,
 	setQueryTerm,
-	setAucStatsData,
-	setBinStatsData,
-	setBinSoldListings,
-	setAucSoldListings,
-	setAucListings,
-	setBinListings,
-	setBinSoldStatsData,
-	setAucSoldStatsData,
-	setHasResults
+	resetStates
 }) {
 	const [formData, setFormData] = useState({
 		grade: '',
@@ -41,22 +32,7 @@ export default function SearchForm({
 			setName: '',
 			additionalDetail: ''
 		});
-		setQueryTerm('');
-		setSearchStatus(false);
-		setAucStatsData('');
-		setBinStatsData('');
-		setAucListings('');
-		setBinListings('');
-		setBinSoldListings('');
-		setAucSoldListings('');
-		setAucSoldStatsData('');
-		setBinSoldStatsData('');
-		setHasResults({
-			bin: false,
-			auc: false,
-			soldBin: false,
-			soldAuc: false
-		});
+		resetStates();
 	};
 
 	const handleChange = (event) => {

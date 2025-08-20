@@ -35,8 +35,7 @@ function App() {
 	let theme = createTheme();
 	theme = responsiveFontSizes(theme);
 
-	const handleSubmit = async (formData) => {
-		console.log('form submitted');
+	function resetStates() {
 		setQueryTerm('');
 		setSearchStatus(false);
 		setAucStatsData('');
@@ -47,6 +46,12 @@ function App() {
 		setAucSoldListings('');
 		setAucSoldStatsData('');
 		setBinSoldStatsData('');
+		setHasResults({ bin: false, auc: false, soldBin: false, soldAuc: false });
+	}
+
+	const handleSubmit = async (formData) => {
+		console.log('form submitted');
+		resetStates();
 		const formValues = Object.values(formData); //converts formData object into an array of values
 		const parsedFormData = formValues.filter(Boolean).join(' '); //removes any blank spaces from array and joins elements with a space
 		setQueryTerm(parsedFormData);
@@ -120,15 +125,7 @@ function App() {
 					handleSubmit={handleSubmit}
 					setSearchStatus={setSearchStatus}
 					setQueryTerm={setQueryTerm}
-					setAucStatsData={setAucStatsData}
-					setBinStatsData={setBinStatsData}
-					setAucListings={setAucListings}
-					setBinListings={setBinListings}
-					setBinSoldListings={setBinSoldListings}
-					setAucSoldListings={setAucSoldListings}
-					setBinSoldStatsData={setBinSoldStatsData}
-					setAucSoldStatsData={setAucSoldStatsData}
-					setHasResults={setHasResults}
+					resetStates={resetStates}
 				/>
 				{searchStatus && (
 					<Box sx={{ border: '1px solid', margin: '2' }}>
