@@ -119,7 +119,7 @@ function App() {
 		<>
 			<Container>
 				<Typography variant="h1" gutterBottom align="center" theme={theme}>
-					CompCompanion
+					CardCompanion
 				</Typography>
 				<SearchForm
 					handleSubmit={handleSubmit}

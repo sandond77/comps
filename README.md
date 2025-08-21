@@ -1,1 +1,1 @@
-# comps
+# CardCompanion
