@@ -6,7 +6,8 @@ import {
 	Box,
 	createTheme,
 	responsiveFontSizes,
-	Grid
+	Grid,
+	Link
 } from '@mui/material';
 import SearchForm from './SearchForm';
 import Results from './Results';
@@ -128,7 +129,7 @@ function App() {
 					resetStates={resetStates}
 				/>
 				{searchStatus && (
-					<Box sx={{ border: '1px solid', margin: '2' }}>
+					<Box sx={{ border: '1px solid', margin: '2', borderRadius: '2px' }}>
 						<Typography
 							variant="h4"
 							gutterBottom
@@ -150,8 +151,8 @@ function App() {
 				)}
 
 				{searchStatus && (
-					<Box sx={{ border: '1px solid', margin: '2' }}>
-						<Grid container spacing={2} sx={{ textAlign: 'left', ml: 2 }}>
+					<Box sx={{ border: '1px solid', margin: '2', borderRadius: '2px' }}>
+						<Grid container spacing={2} sx={{ textAlign: 'center', ml: 2 }}>
 							<Grid size={{ xs: 12, md: 6 }}>
 								<Results
 									boxLabel1={'Active Auction Data'}
@@ -187,6 +188,7 @@ function App() {
 						</Grid>
 					</Box>
 				)}
+				{/* <Link href="#">Link</Link> */}
 			</Container>
 		</>
 	);

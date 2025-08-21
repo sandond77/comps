@@ -26,8 +26,14 @@ export default function ListingsModal({ listings }) {
 	const handleClose = () => setOpen(false);
 
 	return (
-		<div>
-			<Button onClick={handleOpen}>View Listings</Button>
+		<>
+			<Box>
+				{/* <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}></Box> */}
+				<Button variant="contained" onClick={handleOpen}>
+					{listings[0].date ? 'View Active Listings' : 'View Sold Listings'}
+				</Button>
+			</Box>
+
 			<Modal
 				open={open}
 				onClose={handleClose}
@@ -41,6 +47,6 @@ export default function ListingsModal({ listings }) {
 					<ListingsTable listings={listings} />
 				</Box>
 			</Modal>
-		</div>
+		</>
 	);
 }
