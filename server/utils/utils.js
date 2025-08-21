@@ -38,63 +38,95 @@ export async function getEbayAccessToken() {
 	return tokenRes.data.access_token;
 }
 
-//sold listing utils
 export async function scrapeSoldListings(query, sortOrder = 12, maxPages = 3) {
-	const browser = await puppeteer.launch({
-		headless: true, // false to see browser
-		args: [
-			'--no-sandbox',
-			'--disable-setuid-sandbox',
-			'--disable-dev-shm-usage',
-			'--disable-blink-features=AutomationControlled',
-			'--disable-web-security',
-			'--window-size=1920,1080'
-		]
-	});
-	// const browser = await puppeteer.launch({ headless: false });
-	const page = await browser.newPage();
+	let browser;
+	try {
+		browser = await puppeteer.launch({
+			headless: true,
+			args: [
+				'--no-sandbox',
+				'--disable-setuid-sandbox',
+				'--disable-dev-shm-usage',
+				'--disable-blink-features=AutomationControlled',
+				'--disable-web-security',
+				'--window-size=1920,1080'
+			]
+		});
 
-	// This makes headless Chrome look like a normal Chrome
-	await page.evaluateOnNewDocument(() => {
-		Object.defineProperty(navigator, 'webdriver', { get: () => false });
-	});
+		const page = await browser.newPage();
 
-	await page.setUserAgent(
-		'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
-			'(KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-	);
+		// Make headless look like regular Chrome
+		await page.evaluateOnNewDocument(() => {
+			Object.defineProperty(navigator, 'webdriver', { get: () => false });
+		});
+		await page.setUserAgent(
+			'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+				'(KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+		);
+		await page.setViewport({ width: 1920, height: 1080 });
 
-	await page.setViewport({ width: 1920, height: 1080 });
+		const base = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(
+			query
+		)}&LH_Sold=1&LH_Complete=1&_sop=${sortOrder}`;
+		const urlAuction = `${base}&LH_Auction=1`;
+		const urlBin = `${base}&LH_BIN=1`;
 
-	let url = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(
-		query
-	)}&LH_Sold=1&LH_Complete=1&_sop=${sortOrder}`;
+		const aucResults = await scrape(page, urlAuction, maxPages);
+		const binResults = await scrape(page, urlBin, maxPages);
 
-	const urlAuction = url + '&LH_Auction=1';
-	const urlBin = url + '&LH_BIN=1';
-
-	let aucResults = await scrape(page, urlAuction, maxPages);
-	let binResults = await scrape(page, urlBin, maxPages);
-
-	await page.close(); // close the page
-	await browser.close(); // close the browser
-
-	return { aucResults, binResults };
+		await page.close();
+		return { aucResults, binResults };
+	} catch (err) {
+		console.error('Top-level scrapeSoldListings error:', err);
+		throw err;
+	} finally {
+		if (browser) await browser.close();
+	}
 }
 
 async function scrape(page, url, maxPages) {
-	await page.goto(url, { waitUntil: 'networkidle2' });
-	await page.waitForSelector('.s-item', { visible: true, timeout: 15000 });
-	// await page.waitForSelector('.su-card-container__attributes__secondary', {
-	// 	visible: true,
-	// 	timeout: 15000
-	// });
+	// Helper: retry when context gets destroyed (e.g., mid-nav)
+	async function withContextRetry(fn, retries = 3) {
+		for (let i = 0; i < retries; i++) {
+			try {
+				return await fn();
+			} catch (err) {
+				const ctxDestroyed =
+					/Execution context was destroyed|Cannot find context/i.test(
+						err.message
+					);
+				if (!ctxDestroyed || i === retries - 1) throw err;
+				// Wait for the new document to be ready before retrying
+				await page
+					.waitForFunction(() => document.readyState === 'complete')
+					.catch(() => {});
+			}
+		}
+	}
 
-	let results = [];
-	try {
-		let currentPage = 1;
-		while (currentPage <= maxPages) {
-			const pageListings = await page.$$eval('.s-item', (items) =>
+	// Helper: click that might navigate/replace DOM, wait atomically
+	async function clickAndWaitForDom(selector) {
+		await Promise.all([
+			// Some eBay paginations are full navs; some are SPA-like. Cover both:
+			page.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => {}),
+			page.click(selector)
+		]);
+		// After nav/route-change, wait for the new DOM to settle
+		await page.waitForFunction(() => document.readyState !== 'loading');
+		await page.waitForSelector('.s-item', { visible: true, timeout: 30000 });
+	}
+
+	const results = [];
+
+	await page.goto(url, { waitUntil: 'domcontentloaded' });
+	await page.waitForSelector('.s-item', { visible: true, timeout: 30000 });
+
+	let currentPage = 1;
+
+	while (currentPage <= maxPages) {
+		// Re-read the DOM fresh each iteration (no stale handles)
+		const pageListings = await withContextRetry(async () =>
+			page.$$eval('.s-item', (items) =>
 				items
 					.map((item) => {
 						const title = item.querySelector('.s-item__title')?.innerText || '';
@@ -111,50 +143,50 @@ async function scrape(page, url, maxPages) {
 								?.innerText ||
 							'';
 
-						let match = soldDate.match(/([A-Za-z]+ \d{1,2}, \d{4})/); // "Jul 15, 2025"
-						let dateObj = match ? new Date(match[1]) : null;
-						const date = dateObj ? dateObj.toISOString().split('T')[0] : '';
+						const m = soldDate.match(/([A-Za-z]+ \d{1,2}, \d{4})/);
+						const date = m ? new Date(m[1]).toISOString().split('T')[0] : '';
+
 						let link = item.querySelector('.s-item__link')?.href || '';
 						const matchID = link.match(/\/itm\/(\d+)/);
 						const numericId = matchID ? matchID[1] : '';
 						const itemId = numericId ? `v1|${numericId}|0` : '';
+						link = numericId ? `https://www.ebay.com/itm/${numericId}` : link;
 
-						link = numericId ? `https://www.ebay.com/itm/${numericId}` : '';
+						const sellerUsername =
+							item
+								.querySelector('.s-item__etrs-text span.PRIMARY')
+								?.textContent?.trim() || '';
 
-						const spans = item.querySelectorAll(
-							'.s-item__detail.s-item__detail--secondary .s-item__etrs-text span.PRIMARY'
-						);
-						const sellerUsername = spans[0]?.innerText.trim() || '';
-						console.log('seller', sellerUsername);
-						const seller = { username: sellerUsername };
-
-						return { itemId, title, price, date, link, seller };
+						return {
+							itemId,
+							title,
+							price,
+							date,
+							link,
+							seller: { username: sellerUsername }
+						};
 					})
-					.filter((item) => {
-						return (
-							item.title &&
-							!item.title.toLowerCase().includes('shop on ebay') && //to remove ads
-							item.price &&
-							item.link
-						);
-					})
-			);
+					.filter(
+						(x) =>
+							x.title &&
+							!x.title.toLowerCase().includes('shop on ebay') &&
+							x.price &&
+							x.link
+					)
+			)
+		);
 
-			results = results.concat(pageListings);
-			const nextLink = await page.$('a.pagination__next');
-			if (nextLink && currentPage < maxPages) {
-				await Promise.all([
-					nextLink.click(),
-					await page.waitForSelector('.s-item', { visible: true })
-				]);
-				currentPage++;
-			} else {
-				break;
-			}
-		}
-	} catch (e) {
-		console.error('error', e);
-	} finally {
-		return results;
+		results.push(...pageListings);
+
+		if (currentPage >= maxPages) break;
+
+		// Don’t reuse element handles across pages; re-select each time
+		const hasNext = await page.$('a.pagination__next');
+		if (!hasNext) break;
+
+		await clickAndWaitForDom('a.pagination__next');
+		currentPage++;
 	}
+
+	return results;
 }
