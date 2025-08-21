@@ -27,7 +27,7 @@ export default function ListingsModal({ listings }) {
 
 	return (
 		<>
-			<Box>
+			<Box sx={{ marginTop: '2vh' }}>
 				{/* <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}></Box> */}
 				<Button variant="contained" onClick={handleOpen}>
 					{listings[0].date ? 'View Active Listings' : 'View Sold Listings'}

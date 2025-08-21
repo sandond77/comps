@@ -53,8 +53,9 @@ export default function SearchForm({
 			<Grid container spacing={2}>
 				<Grid size={{ xs: 12, md: 2 }}>
 					<TextField
+						required
 						id="grade"
-						label="Grade"
+						label="Grade/Condition"
 						name="grade"
 						fullWidth
 						value={formData.grade}
@@ -134,23 +135,25 @@ export default function SearchForm({
 					/>
 				</Grid>
 			</Grid>
-			<Button
-				variant="contained"
-				type="submit"
-				endIcon={<SearchIcon />}
-				sx={{ my: 2 }}
-			>
-				Search
-			</Button>
-			<Button
-				variant="contained"
-				endIcon={<ClearIcon />}
-				color="error"
-				sx={{ m: 2 }}
-				onClick={handleReset}
-			>
-				Reset
-			</Button>
+			<Box sx={{ textAlign: 'right', ml: 2 }}>
+				<Button
+					variant="contained"
+					type="submit"
+					endIcon={<SearchIcon />}
+					sx={{ my: 2 }}
+				>
+					Search
+				</Button>
+				<Button
+					variant="contained"
+					endIcon={<ClearIcon />}
+					color="error"
+					sx={{ m: 2 }}
+					onClick={handleReset}
+				>
+					Reset
+				</Button>
+			</Box>
 		</Box>
 	);
 }
