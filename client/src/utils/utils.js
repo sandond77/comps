@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Fuse from 'fuse.js';
 
 export async function queryEbay(params) {
 	try {
@@ -114,75 +115,180 @@ export async function parseApiData(
 	};
 }
 
-async function parseResults(arr1, arr2, formData, id, stateListing) {
-	arr1.forEach((result) => {
-		let title = result.title.toLowerCase();
-		title = title.replace(/\s/g, ''); //Removes potential whitespace so query will return PSA10 or PSA 10
-		const grade = formData.grade.toLowerCase();
-		const cardName = formData.cardName.toLowerCase().replace(/\s/g, '');
-		const cardNumber = formData.cardNumber.toLowerCase();
-		const setName = formData.setName.toLowerCase().replace(/\s/g, '');
-		const additionalDetail = formData.setName.toLowerCase().replace(/\s/g, '');
-		// const setNameMatch = setName ? title.includes(setName) : true;
-		// const additionalDetailMatch = additionalDetail ? title.includes(additionalDetail) : true;
-		//&& (setNameMatch || additionalDetailMatch)
+const toStr = (v, d = '') => (v == null ? d : String(v));
+const toLower = (v) => toStr(v).toLowerCase();
+const stripSpaces = (v) => toStr(v).replace(/\s+/g, '');
 
-		// console.log(grade, cardName, cardNumber);
-		// console.log(
-		// 	title.includes(grade),
-		// 	title.includes(cardName),
-		// 	title.includes(cardNumber)
-		// );
+function parsePriceToNumber(priceObj) {
+	if (!priceObj) return { num: NaN, currency: '' };
+	let raw = priceObj.value;
+	let currency = priceObj.currency || '';
+	if (typeof raw === 'number') return { num: raw, currency };
+	raw = toStr(raw).replace(/[^0-9.]/g, '');
+	return { num: raw ? parseFloat(raw) : NaN, currency };
+}
 
-		if (
-			title.includes(grade) &&
-			title.includes(cardName) &&
-			title.includes(cardNumber)
-		) {
-			arr2.push(result);
-		}
-	});
-
-	console.log(id, arr2);
-
-	let priceArray = [];
-	let listingsArray = [];
-
-	//add if check to look for empty array
-	arr2.forEach((result) => {
-		let { value, currency } = result.price || result.currentBidPrice;
-		value = value.replace(/[^0-9.]/g, '');
-		if (currency === 'USD') {
-			priceArray.push(parseFloat(value));
-
-			const listingDetail = {
-				id: result.itemId || '',
-				title: result.title || '',
-				url: result.itemWebUrl || result.link || '',
-				seller: result.seller?.username || '',
-				price: parseFloat(parseFloat(value).toFixed(2)),
-				date: result.date || ''
-			};
-
-			listingsArray.push(listingDetail);
-		}
-	});
-
-	// sorts most recent first if there is a date; mainly for sold listings
-	listingsArray.sort((a, b) => {
-		if (a.date && b.date) {
-			const dateA = new Date(a.date);
-			const dateB = new Date(b.date);
-			return dateB - dateA;
-		}
-	});
-
-	stateListing(listingsArray);
-
+function calcStats(priceArray) {
+	if (!priceArray.length) {
+		return {
+			Average: '0.00',
+			Lowest: '0.00',
+			Highest: '0.00',
+			'Data Points': 0
+		};
+	}
+	const sum = priceArray.reduce((a, b) => a + b, 0);
 	return {
-		Average: calculateAverage(priceArray).toFixed(2),
+		Average: (sum / priceArray.length).toFixed(2),
 		Lowest: Math.min(...priceArray).toFixed(2),
 		Highest: Math.max(...priceArray).toFixed(2),
 		'Data Points': priceArray.length
 	};
+}
+
+// ---- STRICT + FUZZY with weighted re-ranking ----
+async function parseResults(arr1, arr2, formData, id, stateListing) {
+	const grade = toLower(formData?.grade);
+	const cardName = stripSpaces(toLower(formData?.cardName));
+	const cardNumber = toLower(formData?.cardNumber);
+	const setName = stripSpaces(toLower(formData?.setName));
+	const rarity = stripSpaces(toLower(formData?.rarity));
+	const additionalDetail = stripSpaces(toLower(formData?.additionalDetail));
+	const languageRaw = toLower(formData?.language); // e.g., 'english', 'japanese'
+	const languageTerm =
+		languageRaw === 'english' ? '' : stripSpaces(languageRaw);
+
+	// ---------- 1) STRICT FILTER (your original semantics) ----------
+	for (const result of arr1) {
+		const titleNorm = stripSpaces(toLower(result?.title));
+		if (!titleNorm) continue;
+
+		const baseMatch =
+			(!grade || titleNorm.includes(grade)) &&
+			(!cardName || titleNorm.includes(cardName)) &&
+			(!cardNumber || titleNorm.includes(cardNumber));
+
+		if (!baseMatch) continue;
+
+		const setMatch = setName ? titleNorm.includes(setName) : true;
+		const rarityMatch = rarity ? titleNorm.includes(rarity) : true;
+		const detailMatch = additionalDetail
+			? titleNorm.includes(additionalDetail)
+			: true;
+		const langMatch = languageTerm ? titleNorm.includes(languageTerm) : true; // ignore 'english'
+
+		if (setMatch && rarityMatch && detailMatch && langMatch) arr2.push(result);
+	}
+
+	// ---------- 2) FUZZY BACKFILL (with weighted re-ranking) ----------
+	const STRICT_MIN = 8; // when fewer than this, try fuzzy
+	const FUZZY_TAKE = 12; // cap of extra fuzzy adds
+
+	if (arr2.length < STRICT_MIN) {
+		// index with normalized title to help Fuse
+		const indexed = (arr1 || []).map((it) => ({
+			...it,
+			_normTitle: stripSpaces(toLower(it?.title))
+		}));
+
+		const fuse = new Fuse(indexed, {
+			includeScore: true,
+			ignoreLocation: true,
+			minMatchCharLength: 2,
+			threshold: 0.33, // lower = stricter
+			keys: [
+				{ name: 'title', weight: 0.7 },
+				{ name: '_normTitle', weight: 0.3 }
+			]
+		});
+
+		// Extended search: AND all terms by joining with spaces, each prefixed by '
+		const terms = [
+			grade && `'${grade}`,
+			cardName && `'${cardName}`,
+			cardNumber && `'${cardNumber}`,
+			setName && `'${setName}`,
+			rarity && `'${rarity}`,
+			additionalDetail && `'${additionalDetail}`,
+			languageTerm && `'${languageTerm}` // skip 'english'
+		].filter(Boolean);
+
+		let fuzzyResults = [];
+		if (terms.length) {
+			const hits = fuse.search(terms.join(' '));
+
+			// Re-rank with manual bonus weights for set/rarity/additional matches
+			// (lower score is better; subtract bonus*factor)
+			const SET_BONUS = 0.35;
+			const RARITY_BONUS = 0.28;
+			const DETAIL_BONUS = 0.22;
+			const LANG_BONUS = 0.18;
+
+			fuzzyResults = hits
+				.map((r) => {
+					const tNorm = stripSpaces(toLower(r.item?.title || ''));
+					let bonus = 0;
+					if (setName && tNorm.includes(setName)) bonus += SET_BONUS;
+					if (rarity && tNorm.includes(rarity)) bonus += RARITY_BONUS;
+					if (additionalDetail && tNorm.includes(additionalDetail))
+						bonus += DETAIL_BONUS;
+					if (languageTerm && tNorm.includes(languageTerm)) bonus += LANG_BONUS;
+
+					const adjusted = Math.max(0, (r.score ?? 0) - bonus);
+					return { ...r, adjustedScore: adjusted };
+				})
+				.sort((a, b) => a.adjustedScore - b.adjustedScore);
+		}
+
+		// Add up to FUZZY_TAKE items not already present (dedupe by id|title)
+		const have = new Set(
+			arr2.map((x) => (x.itemId || '') + '|' + toLower(x.title || ''))
+		);
+		for (const r of fuzzyResults) {
+			const item = r.item;
+			const key = (item.itemId || '') + '|' + toLower(item.title || '');
+			if (have.has(key)) continue;
+
+			// still enforce optional set/rarity/details/language on backfill
+			const tNorm = stripSpaces(toLower(item.title || ''));
+			const setOk = setName ? tNorm.includes(setName) : true;
+			const rarOk = rarity ? tNorm.includes(rarity) : true;
+			const detOk = additionalDetail ? tNorm.includes(additionalDetail) : true;
+			const langOk = languageTerm ? tNorm.includes(languageTerm) : true;
+
+			if (!(setOk && rarOk && detOk && langOk)) continue;
+
+			arr2.push(item);
+			have.add(key);
+			if (arr2.length >= STRICT_MIN + FUZZY_TAKE) break;
+		}
+	}
+
+	// ---------- 3) BUILD PRICES/LISTINGS + STATS ----------
+	const priceArray = [];
+	const listingsArray = [];
+
+	for (const result of arr2) {
+		const primaryPrice = result?.price || result?.currentBidPrice || null;
+		const { num, currency } = parsePriceToNumber(primaryPrice);
+		const isUSD = !currency || currency === 'USD';
+		if (!isUSD || !Number.isFinite(num)) continue;
+
+		priceArray.push(num);
+		listingsArray.push({
+			id: result.itemId || '',
+			title: result.title || '',
+			url: result.itemWebUrl || result.link || '',
+			seller: result?.seller?.username || '',
+			price: parseFloat(num.toFixed(2)),
+			date: result.date || ''
+		});
+	}
+
+	listingsArray.sort((a, b) =>
+		a.date && b.date ? new Date(b.date) - new Date(a.date) : 0
+	);
+	stateListing(listingsArray);
+
+	return calcStats(priceArray);
 }
