@@ -45,7 +45,16 @@ export default function SearchForm({
 	const submitForm = (event) => {
 		event.preventDefault();
 		setQueryTerm('');
-		handleSubmit(formData);
+
+		// sanitize language before submit
+		let safeFormData = { ...formData };
+		const lang = (safeFormData.language || '').trim().toLowerCase();
+
+		if (['english', 'eng', 'en'].includes(lang)) {
+			safeFormData = { ...safeFormData, language: '' };
+		}
+
+		handleSubmit(safeFormData);
 	};
 
 	return (

@@ -10,7 +10,6 @@ export async function queryEbay(params) {
 		const ebayScrape = await axios.get(
 			`http://localhost:3001/api/scrape?${params}`
 		);
-		// return ebayScrape;
 		return { ebaySearch, ebayScrape };
 	} catch (error) {
 		console.error(error);
@@ -203,14 +202,14 @@ async function parseResults(arr1, arr2, formData, id, stateListing) {
 		});
 
 		// Extended search: AND all terms by joining with spaces, each prefixed by '
+
 		const terms = [
 			grade && `'${grade}`,
 			cardName && `'${cardName}`,
 			cardNumber && `'${cardNumber}`,
 			setName && `'${setName}`,
 			rarity && `'${rarity}`,
-			additionalDetail && `'${additionalDetail}`,
-			languageTerm && `'${languageTerm}` // skip 'english'
+			additionalDetail && `'${additionalDetail}`
 		].filter(Boolean);
 
 		let fuzzyResults = [];
