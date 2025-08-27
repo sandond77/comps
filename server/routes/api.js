@@ -18,7 +18,7 @@ router.get('/search', async (req, res) => {
 			auction: aucResults.data.itemSummaries
 		};
 		// console.log(combinedResults);
-		res.json(combinedResults);
+		await res.json(combinedResults);
 	} catch (err) {
 		console.error(err.response?.data || err.message);
 		res.status(500).json({ error: 'eBay API call failed' });
@@ -34,7 +34,7 @@ router.get('/scrape', async (req, res) => {
 			binSold: scrapeResults.binResults,
 			aucSold: scrapeResults.aucResults
 		};
-		res.json(combinedResults);
+		await res.json(combinedResults);
 	} catch (err) {
 		console.error(err.response?.data || err.message);
 		res.status(500).json({ error: 'Scrape failed' });
