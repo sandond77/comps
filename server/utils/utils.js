@@ -199,7 +199,6 @@ export async function scrapeSoldListings(query, sortOrder = 12, maxPages = 3) {
 	}
 }
 
-// ------------------------ Core scraper per mode ------------------------
 async function scrapeMode(page, url, maxPages) {
 	// Retry wrapper for context-destroyed mid-nav
 	async function withContextRetry(fn, retries = 3) {
@@ -220,8 +219,10 @@ async function scrapeMode(page, url, maxPages) {
 	}
 
 	const results = [];
+	const seenGlobal = new Set(); // track all itemIds across pages
 	let currentPage = 1;
 
+	// go to first page
 	await page.goto(`${url}&_ipg=240&_pgn=${currentPage}`, {
 		waitUntil: 'domcontentloaded',
 		timeout: 60000
@@ -236,12 +237,12 @@ async function scrapeMode(page, url, maxPages) {
 	await waitForRealItems(page, 500, 20000);
 
 	while (currentPage <= maxPages) {
+		// Extract listings from the DOM
 		const pageListings = await withContextRetry(async () =>
 			page.$$eval(
 				'li.s-card, li.s-item, .su-card-container, .s-item',
 				(cards) => {
 					const clean = (s) => (s || '').replace(/\s+/g, ' ').trim();
-
 					const firstText = (el, sels) => {
 						for (const sel of sels) {
 							const n = el.querySelector(sel);
@@ -263,7 +264,7 @@ async function scrapeMode(page, url, maxPages) {
 						return '';
 					};
 
-					// Cross-layout selectors (OLD + NEW)
+					// Cross-layout selectors
 					const TITLE_SEL = [
 						'.s-item__title',
 						'.s-card__title .su-styled-text.primary.default',
@@ -283,7 +284,7 @@ async function scrapeMode(page, url, maxPages) {
 						'.s-item__ended-date',
 						'.s-item__title--tagblock span',
 						'.s-item__caption--signal.POSITIVE span',
-						'.su-styled-text.positive.default' // "Sold  Aug 24, 2025"
+						'.su-styled-text.positive.default'
 					];
 					const SELLER_SEL = [
 						'.s-item__etrs-text span.PRIMARY',
@@ -296,11 +297,33 @@ async function scrapeMode(page, url, maxPages) {
 						'a[href*="/itm/"]'
 					];
 
+					// Build cards by anchoring on item links
+					const anchors = Array.from(
+						document.querySelectorAll(LINK_SEL.join(','))
+					);
+					const cardSet = new Set();
+					for (const a of anchors) {
+						const card =
+							a.closest('li.s-card') ||
+							a.closest('li.s-item') ||
+							a.closest('.su-card-container') ||
+							a.closest('.s-item') ||
+							a.closest('.s-item__wrapper') ||
+							a.closest('.s-item__info') ||
+							a.closest('li') ||
+							a.parentElement;
+						if (card) cardSet.add(card);
+					}
+					const cardsArr = Array.from(cardSet);
+
 					const out = [];
-					for (const el of cards) {
+					const seenIds = new Set(); // per-page dedupe
+
+					for (const el of cardsArr) {
 						const linkRaw = firstHref(el, LINK_SEL);
-						const id = (linkRaw.match(/\/itm\/(\d+)/) || [])[1];
-						if (!id) continue;
+						const id = (linkRaw || '').match(/\/itm\/(\d+)/)?.[1];
+						if (!id || seenIds.has(id)) continue;
+						seenIds.add(id);
 
 						const title = firstText(el, TITLE_SEL);
 						if (!title || /shop on ebay|sponsored/i.test(title)) continue;
@@ -309,7 +332,7 @@ async function scrapeMode(page, url, maxPages) {
 						const soldText = firstText(el, SOLD_SEL);
 						const sellerTxt = firstText(el, SELLER_SEL);
 
-						// Parse sold date like "Sold  Aug 24, 2025"
+						// Parse sold date
 						let date = '';
 						const m = (soldText || '').match(
 							/([A-Za-z]{3,9}\s+\d{1,2},\s+\d{4})/
@@ -322,29 +345,28 @@ async function scrapeMode(page, url, maxPages) {
 						out.push({
 							itemId: `v1|${id}|0`,
 							title,
-							price: { value: priceText, currency: 'USD' }, // keep your original shape
+							price: { value: priceText, currency: 'USD' },
 							date,
 							link: `https://www.ebay.com/itm/${id}`,
 							seller: { username: clean(sellerTxt) || '' }
 						});
 					}
 
-					return out.filter(
-						(x) =>
-							x.title &&
-							!x.title.toLowerCase().includes('shop on ebay') &&
-							x.price &&
-							x.link
-					);
+					return out;
 				}
 			)
 		);
 
-		results.push(...pageListings);
+		// Global dedupe across pages
+		for (const it of pageListings) {
+			if (!it.itemId || seenGlobal.has(it.itemId)) continue;
+			seenGlobal.add(it.itemId);
+			results.push(it);
+		}
 
 		if (currentPage >= maxPages) break;
 
-		// Next page (cover old + new controls)
+		// pagination
 		const nextSelectors = [
 			'a.pagination__next:not([aria-disabled="true"])',
 			'a.pagination__next',
