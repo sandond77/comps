@@ -7,10 +7,11 @@ export async function queryEbay(params) {
 			`http://localhost:3001/api/search?${params}`
 		);
 
-		const ebayScrape = await axios.get(
-			`http://localhost:3001/api/scrape?${params}`
-		);
-		return { ebaySearch, ebayScrape };
+		// const ebayScrape = await axios.get(
+		// 	`http://localhost:3001/api/scrape?${params}`
+		// );
+		// return { ebaySearch, ebayScrape };
+		return { ebaySearch };
 	} catch (error) {
 		console.error(error);
 	}
@@ -93,16 +94,16 @@ export async function parseApiData(
 
 	const binStats = await maybeParse(filteredBinResults, 'bin', setBinListings);
 	const aucStats = await maybeParse(filteredAucResults, 'auc', setAucListings);
-	const binSoldStats = await maybeParse(
-		filteredSoldBinResults,
-		'soldBin',
-		setSoldBinListings
-	);
-	const aucSoldStats = await maybeParse(
-		filteredSoldAucResults,
-		'soldAuc',
-		setSoldAucListings
-	);
+	// const binSoldStats = await maybeParse(
+	// 	filteredSoldBinResults,
+	// 	'soldBin',
+	// 	setSoldBinListings
+	// );
+	// const aucSoldStats = await maybeParse(
+	// 	filteredSoldAucResults,
+	// 	'soldAuc',
+	// 	setSoldAucListings
+	// );
 
 	console.log('done');
 

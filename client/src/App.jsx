@@ -169,7 +169,7 @@ function App() {
 									loading={loading}
 								/>
 							</Grid>
-							<Grid size={{ xs: 12, md: 6 }}>
+							{/* <Grid size={{ xs: 12, md: 6 }}>
 								<Results
 									boxLabel1={'Sold Auction Data'}
 									listingsArray={aucSoldListings}
@@ -184,7 +184,7 @@ function App() {
 									statsObject={binSoldStatsData}
 									loading={loading}
 								/>
-							</Grid>
+							</Grid> */}
 						</Grid>
 					</Box>
 				)}
